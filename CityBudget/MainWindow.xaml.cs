@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -83,5 +84,43 @@ namespace CityBudget
             storyboard.Begin();
             isRunning = !isRunning;
         }
+
+        #region TaskBar
+        private void Grid_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+                this.DragMove();
+        }
+
+        private void BtnExit_MouseEnter(object sender, MouseEventArgs e)
+        {
+            BtnExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x3d, 0x3d, 0x3d));
+        }
+
+        private void BtnExit_MouseLeave(object sender, MouseEventArgs e)
+        {
+            BtnExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1f, 0x1f, 0x1f));
+        }
+
+        private void MinExit_MouseEnter(object sender, MouseEventArgs e)
+        {
+            MinExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x3d, 0x3d, 0x3d));
+        }
+
+        private void MinExit_MouseLeave(object sender, MouseEventArgs e)
+        {
+            MinExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1f, 0x1f, 0x1f));
+        }
+
+        private void BtnExit_Click(object sender, RoutedEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
+
+        private void MinExit_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+        #endregion
     }
 }
