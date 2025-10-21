@@ -19,7 +19,7 @@ namespace CityBudget
         DateTime currentDate = new(2000, 1, 1);
         bool isRunning = false;
         double zadowolenie = 50.0;
-
+        bool canClose = true;
         public MainWindow()
         {
             InitializeComponent();
@@ -55,11 +55,13 @@ namespace CityBudget
 
         private void MainNewDay()
         {
+            canClose = false;
             Dispatcher.Invoke(() =>
             {
                 TimeText.Content = $"{currentDate.Day}.{currentDate.Month}.{currentDate.Year}";
                 TextBlock.Text = isRunning ? "Running" : "Paused";
             });
+            canClose = true;
         }
 
         private void MainNewMonth()
@@ -94,12 +96,12 @@ namespace CityBudget
 
         private void BtnExit_MouseEnter(object sender, MouseEventArgs e)
         {
-            BtnExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x3d, 0x3d, 0x3d));
+            BtnExitBorder.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x3d, 0x3d, 0x3d));
         }
 
         private void BtnExit_MouseLeave(object sender, MouseEventArgs e)
         {
-            BtnExit.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1f, 0x1f, 0x1f));
+            BtnExitBorder.Background = new SolidColorBrush(Color.FromArgb(0x00, 0x1f, 0x1f, 0x1f));
         }
 
         private void MinExit_MouseEnter(object sender, MouseEventArgs e)
@@ -114,7 +116,8 @@ namespace CityBudget
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
-            App.Current.Shutdown();
+            if(canClose)
+                App.Current.Shutdown();
         }
 
         private void MinExit_Click(object sender, RoutedEventArgs e)
