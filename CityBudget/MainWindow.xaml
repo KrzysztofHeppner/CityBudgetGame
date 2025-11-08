@@ -25,7 +25,7 @@
                       CornerRadius="0" />
     </WindowChrome.WindowChrome>
 
-    <Border Background="White"
+    <Border Background="#FF505050"
             CornerRadius="12"
             BorderBrush="Transparent"
             BorderThickness="0">
@@ -43,7 +43,7 @@
 
 
 
-        <Border BorderBrush="#E0E0E0"
+        <Border BorderBrush="#FF505050"
                 BorderThickness="1"
                 CornerRadius="12"
                 Background="#FF252525"
@@ -56,7 +56,7 @@
 
 
             <Grid>
-                <Border BorderBrush="#E0E0E0"
+                <Border BorderBrush="#FF505050"
                         BorderThickness="0"
                         Background="#FF1b1b1b"
                         ClipToBounds="True"
@@ -76,11 +76,72 @@
                                HorizontalContentAlignment="Center"
                                Foreground="White"
                                FontSize="25" />
+
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="250"
+                                Height="100"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                CornerRadius="15,15,15,15"
+                                Margin="0,75,0,0"
+                                Background="#FF313131" />
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="#FF313131"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="250"
+                                Height="150"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                CornerRadius="15,15,15,15"
+                                Margin="0,200,0,0" />
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="#FF313131"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="250"
+                                Height="50"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                CornerRadius="15,15,15,15"
+                                Margin="0,375,0,0" />
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="#FF313131"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="250"
+                                Height="50"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                CornerRadius="15,15,15,15"
+                                Margin="0,450,0,0" />
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="#FF313131"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="250"
+                                Height="50"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                CornerRadius="15,15,15,15"
+                                Margin="0,525,0,0" />
                     </Grid>
                 </Border>
 
 
-                <Border BorderBrush="#E0E0E0"
+                <Border BorderBrush="#FF505050"
                         BorderThickness="0"
                         Background="#FF1f1f1f"
                         ClipToBounds="True"
@@ -92,7 +153,67 @@
                           VerticalAlignment="Top"
                           Margin="0,0,0,0">
 
-                        <Border BorderBrush="#E0E0E0"
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="Transparent"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="50"
+                                Height="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                CornerRadius="25,25,25,25"
+                                Margin="25,25,0,0">
+
+                        </Border>
+
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="1"
+                                Background="#FF00FF4A"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="50"
+                                Height="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                CornerRadius="15,15,15,15"
+                                Margin="350,0,0,0">
+
+                        </Border>
+
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="0"
+                                Background="#FF0010FF"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="50"
+                                Height="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                CornerRadius="15,15,15,15"
+                                Margin="425,0,0,0">
+
+                        </Border>
+
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="0"
+                                Background="#FFFFF500"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="50"
+                                Height="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                CornerRadius="15,15,15,15"
+                                Margin="500,0,0,0">
+
+                        </Border>
+
+                        <Border BorderBrush="#FF505050"
                                 BorderThickness="0"
                                 Background="#FF1f1f1f"
                                 ClipToBounds="True"
@@ -239,17 +360,59 @@
                                 </Canvas>
                             </Viewbox>
                         </Button>
+                        <Border BorderBrush="#FF505050"
+                                BorderThickness="0"
+                                Background="Red"
+                                ClipToBounds="True"
+                                MinHeight="50"
+                                MinWidth="50"
+                                Width="50"
+                                Height="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                CornerRadius="15,15,15,15"
+                                Margin="575,0,0,0" />
                     </Grid>
                 </Border>
-                <TextBlock Name="TextBlock"
-                           HorizontalAlignment="Left"
-                           Margin="711,311,0,0"
-                           TextWrapping="Wrap"
-                           Text="TextBlock"
-                           VerticalAlignment="Top"
-                           Height="113"
-                           Width="149"
-                           Foreground="White" />
+                <Border BorderBrush="#FF505050"
+                        BorderThickness="0"
+                        Background="#FF1f1f1f"
+                        ClipToBounds="True"
+                        Width="149"
+                        Height="113"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        CornerRadius="12,12,5,5"
+                        Margin="0,595,10,0">
+                    <TextBlock Name="TextBlock"
+                               HorizontalAlignment="Left"
+                               Margin="1119,595,0,0"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"
+                               Height="113"
+                               Width="149"
+                               Foreground="White" />
+                </Border>
+
+                <Border BorderBrush="#FF505050"
+                        BorderThickness="0"
+                        Background="#FF1f1f1f"
+                        ClipToBounds="True"
+                        Width="379"
+                        Height="306"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        CornerRadius="12,12,5,5"
+                        Margin="858,172,0,0">
+                    <TextBlock HorizontalAlignment="Left"
+                               Margin="1119,595,0,0"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Top"
+                               Height="113"
+                               Width="149"
+                               Foreground="White" />
+                </Border>
+
                 <Label Foreground="White"
                        x:Name="TimeText"
                        Content="1.01.2000"
@@ -263,6 +426,33 @@
                        VerticalAlignment="Top"
                        HorizontalAlignment="Right"
                        Width="100" />
+                <Slider Margin="396,172,682,497"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="50"
+                        Width="200"
+                        Height="51"
+                        TickPlacement="BottomRight"
+                        TickFrequency="10"
+                        IsSnapToTickEnabled="True" />
+                <Slider Margin="396,258,682,410"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="50"
+                        Width="200"
+                        Height="51"
+                        TickPlacement="BottomRight"
+                        TickFrequency="10"
+                        IsSnapToTickEnabled="True" />
+                <Slider Margin="396,334,682,334"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="50"
+                        Width="200"
+                        Height="51"
+                        TickPlacement="BottomRight"
+                        TickFrequency="10"
+                        IsSnapToTickEnabled="True" />
 
             </Grid>
         </Border>
