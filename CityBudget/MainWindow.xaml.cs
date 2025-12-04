@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace CityBudget
@@ -18,16 +21,30 @@ namespace CityBudget
         private Timer? _timer;
         DateTime currentDate = new(2000, 1, 1);
         bool isRunning = false;
-        double zadowolenie = 50.0;
-        bool canClose = true;
+        float zadowolenie = 50.0f;
+        bool canClose = true; bool wantClose = false;
+
+        Person[] citizens;
+
+        PageInfo pageInfo = new PageInfo();
+        PageTax pageTax = new PageTax();
+
         public MainWindow()
         {
             InitializeComponent();
 
             _stopwatch.Start();
             _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
-
+            MainFrame.Visibility = Visibility.Visible;
+            citizens = CityPopulationFunction.MakeNewPoplation(1000, 2.0f, 40.0f, 1.5f, 1.0f, 0.7f, 2.0f, 50000.0f);
+            foreach (var p in citizens)
+            {
+                pageInfo.output1.Text += $"ID: {p.id}, Wiek: {p.wiek}, Majatek: {p.majatek}, Dzieci: {p.iloscDzieci}, ParaID: {p.paraId}\n";
+            }
         }
+
+        
+
 
         private void MainTimerTick(object? state)
         {
@@ -38,7 +55,7 @@ namespace CityBudget
 
             if (isRunning)
             {
-                currentDate = currentDate.AddDays(1);                
+                currentDate = currentDate.AddDays(1);
             }
 
             if (currentDate.Hour == 0)
@@ -49,24 +66,27 @@ namespace CityBudget
                     MainNewMonth();
                 }
             }
-            
+
 
         }
 
         private void MainNewDay()
         {
-            canClose = false;
-            Dispatcher.Invoke(() =>
+            if (!wantClose)
             {
-                TimeText.Content = $"{currentDate.Day}.{currentDate.Month}.{currentDate.Year}";
-                TextBlock.Text = isRunning ? "Running" : "Paused";
-            });
-            canClose = true;
+                canClose = false;
+                Dispatcher.Invoke(() =>
+                {
+                    TimeText.Content = $"{currentDate.Day}.{currentDate.Month}.{currentDate.Year}";
+                    pageInfo.textBlockInfo.Text = isRunning ? "Running" : "Paused";
+                });
+                canClose = true;
+            }
         }
 
         private void MainNewMonth()
         {
-            
+
         }
 
         protected override void OnClosed(EventArgs e)
@@ -116,7 +136,8 @@ namespace CityBudget
 
         private void BtnExit_Click(object sender, RoutedEventArgs e)
         {
-            if(canClose)
+            wantClose = true;
+            if (canClose)
                 App.Current.Shutdown();
         }
 
@@ -124,6 +145,20 @@ namespace CityBudget
         {
             WindowState = WindowState.Minimized;
         }
+
+
+
         #endregion
+
+        private void ButtonBlue_Click(object sender, RoutedEventArgs e)
+        {
+            var pageGraph = new PageGraph(citizens);
+            MainFrame.Navigate(pageGraph);
+        }
+
+        private void ButtonYellow_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(pageInfo);
+        }
     }
 }

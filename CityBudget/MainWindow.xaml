@@ -11,7 +11,9 @@
         ResizeMode="CanResize"
         Background="Transparent"
         MinHeight="720"
-        MinWidth="1280">
+        MinWidth="1280"
+        MaxHeight="720"
+        MaxWidth="1280">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -195,6 +197,27 @@
                                 VerticalAlignment="Center"
                                 CornerRadius="15,15,15,15"
                                 Margin="425,0,0,0">
+                            <Button Background="Transparent"
+                                    Click="ButtonBlue_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Grid>
+                                                        <Ellipse Fill="{TemplateBinding Background}"
+                                                                 x:Name="ButtonEllipse" />
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center" />
+
+
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
                         </Border>
 
@@ -210,6 +233,27 @@
                                 VerticalAlignment="Center"
                                 CornerRadius="15,15,15,15"
                                 Margin="500,0,0,0">
+                            <Button Background="Transparent"
+                                    Click="ButtonYellow_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Grid>
+                                                        <Ellipse Fill="{TemplateBinding Background}"
+                                                                 x:Name="ButtonEllipse" />
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center" />
+
+
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
                         </Border>
 
@@ -372,87 +416,44 @@
                                 VerticalAlignment="Center"
                                 CornerRadius="15,15,15,15"
                                 Margin="575,0,0,0" />
+                        <Label Foreground="White"
+                               x:Name="TimeText"
+                               Content="1.01.2000"
+                               HorizontalContentAlignment="Center"
+                               VerticalContentAlignment="Center"
+                               Margin="0,40,100,0"
+                               FontSize="20"
+                               MinWidth="100"
+                               MinHeight="40"
+                               Height="40"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                               Width="100" />
                     </Grid>
                 </Border>
-                <Border BorderBrush="#FF505050"
-                        BorderThickness="0"
-                        Background="#FF1f1f1f"
-                        ClipToBounds="True"
-                        Width="149"
-                        Height="113"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
-                        CornerRadius="12,12,5,5"
-                        Margin="0,595,10,0">
-                    <TextBlock Name="TextBlock"
-                               HorizontalAlignment="Left"
-                               Margin="1119,595,0,0"
-                               TextWrapping="Wrap"
-                               VerticalAlignment="Top"
-                               Height="113"
-                               Width="149"
-                               Foreground="White" />
-                </Border>
 
                 <Border BorderBrush="#FF505050"
                         BorderThickness="0"
-                        Background="#FF1f1f1f"
+                        Background="#FF252525"
                         ClipToBounds="True"
-                        Width="379"
-                        Height="306"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        CornerRadius="12,12,5,5"
-                        Margin="858,172,0,0">
-                    <TextBlock HorizontalAlignment="Left"
-                               Margin="1119,595,0,0"
-                               TextWrapping="Wrap"
-                               VerticalAlignment="Top"
-                               Height="113"
-                               Width="149"
-                               Foreground="White" />
-                </Border>
+                        CornerRadius="0,0,50,0"
+                        Width="980"
+                        Margin="300,100,0,0"
+                        HorizontalAlignment="Left">
+                    <Grid>
 
-                <Label Foreground="White"
-                       x:Name="TimeText"
-                       Content="1.01.2000"
-                       HorizontalContentAlignment="Center"
-                       VerticalContentAlignment="Center"
-                       Margin="0,105,10,0"
-                       FontSize="20"
-                       MinWidth="100"
-                       MinHeight="40"
-                       Height="40"
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Right"
-                       Width="100" />
-                <Slider Margin="396,172,682,497"
-                        Minimum="0"
-                        Maximum="100"
-                        Value="50"
-                        Width="200"
-                        Height="51"
-                        TickPlacement="BottomRight"
-                        TickFrequency="10"
-                        IsSnapToTickEnabled="True" />
-                <Slider Margin="396,258,682,410"
-                        Minimum="0"
-                        Maximum="100"
-                        Value="50"
-                        Width="200"
-                        Height="51"
-                        TickPlacement="BottomRight"
-                        TickFrequency="10"
-                        IsSnapToTickEnabled="True" />
-                <Slider Margin="396,334,682,334"
-                        Minimum="0"
-                        Maximum="100"
-                        Value="50"
-                        Width="200"
-                        Height="51"
-                        TickPlacement="BottomRight"
-                        TickFrequency="10"
-                        IsSnapToTickEnabled="True" />
+                        
+
+                        <Frame x:Name="MainFrame"
+                               Grid.Row="1"
+                               Grid.Column="1"
+                               NavigationUIVisibility="Hidden"
+                               Content=""
+                               Visibility="Hidden" />
+
+
+                    </Grid>
+                </Border>
 
             </Grid>
         </Border>

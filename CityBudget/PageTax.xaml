@@ -1,0 +1,44 @@
+﻿<Page x:Class="CityBudget.PageTax"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:CityBudget"
+      mc:Ignorable="d" 
+      d:DesignHeight="620" d:DesignWidth="980"
+      Title="PageTax">
+
+    <Grid>
+        <Slider Margin="95,95,505,304"
+                Minimum="0"
+                Maximum="100"
+                Value="50"
+                Width="200"
+                Height="51"
+                TickPlacement="BottomRight"
+                TickFrequency="10"
+                IsSnapToTickEnabled="True" />
+        <Slider Margin="95,174,505,225"
+                Minimum="0"
+                Maximum="100"
+                Value="50"
+                Width="200"
+                Height="51"
+                TickPlacement="BottomRight"
+                TickFrequency="10"
+                IsSnapToTickEnabled="True" />
+        <Slider Margin="95,247,505,152"
+                Minimum="0"
+                Maximum="100"
+                Value="50"
+                Width="200"
+                Height="51"
+                TickPlacement="BottomRight"
+                TickFrequency="10"
+                IsSnapToTickEnabled="True" />
+        <Frame x:Name="PageTaxFrame"
+               JournalOwnership="OwnsJournal"
+               NavigationUIVisibility="Hidden" />
+
+    </Grid>
+</Page>
