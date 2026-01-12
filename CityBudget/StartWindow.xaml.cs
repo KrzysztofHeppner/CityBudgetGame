@@ -36,6 +36,10 @@ namespace CityBudget
         {
             
         }
+        private void ButtonLeave_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
 
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -67,6 +71,19 @@ namespace CityBudget
         {
             BorderLoadGame.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
             ButtonLoadGame.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            Cursor = Cursors.Arrow;
+        }
+        private void ButtonLeave_MouseEnter(object sender, MouseEventArgs e)
+        {
+            BorderLeave.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            ButtonLeave.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            Cursor = Cursors.Hand;
+        }
+
+        private void ButtonLeave_MouseLeave(object sender, MouseEventArgs e)
+        {
+            BorderLeave.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            ButtonLeave.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
             Cursor = Cursors.Arrow;
         }
     }

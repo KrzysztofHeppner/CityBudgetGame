@@ -13,7 +13,8 @@
         MinHeight="720"
         MinWidth="1280"
         MaxHeight="720"
-        MaxWidth="1280">
+        MaxWidth="1280"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -423,7 +424,7 @@
                                VerticalContentAlignment="Center"
                                Margin="0,40,100,0"
                                FontSize="20"
-                               MinWidth="100"
+                               MinWidth="110"
                                MinHeight="40"
                                Height="40"
                                VerticalAlignment="Top"
@@ -434,15 +435,19 @@
 
                 <Border BorderBrush="#FF505050"
                         BorderThickness="0"
-                        Background="#FF252525"
                         ClipToBounds="True"
-                        CornerRadius="0,0,50,0"
+                        CornerRadius="0,0,11,0"
                         Width="980"
-                        Margin="300,100,0,0"
+                        Margin="298,100,0,0"
                         HorizontalAlignment="Left">
+                    <Border.Background>
+                        <ImageBrush ImageSource="/Background1.png"
+                                    Stretch="None"
+                                    Opacity="1" />
+                    </Border.Background>
                     <Grid>
 
-                        
+
 
                         <Frame x:Name="MainFrame"
                                Grid.Row="1"

@@ -9,4 +9,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Background1.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Background1.png" />
+  </ItemGroup>
+
 </Project>

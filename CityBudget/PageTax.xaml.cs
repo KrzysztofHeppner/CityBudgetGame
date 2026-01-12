@@ -1,28 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CityBudget
 {
-    /// <summary>
-    /// Interaction logic for PageTax.xaml
-    /// </summary>
     public partial class PageTax : Page
     {
-        public PageTax()
+        private Action<double> _onTaxChanged;
+
+        public PageTax(double currentBudget, double currentTax, Action<double> onTaxChanged)
         {
             InitializeComponent();
+
+            _onTaxChanged = onTaxChanged;
+
+            BudgetDisplay.Text = $"{currentBudget:N2} PLN";
+            TaxSlider.Value = currentTax;
+            TaxValueText.Text = $"{currentTax * 100:F0}%";
+        }
+
+        public PageTax() { InitializeComponent(); }
+
+        private void TaxSlider_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (TaxValueText != null)
+            {
+                TaxValueText.Text = $"{e.NewValue * 100:F0}%";
+
+                _onTaxChanged?.Invoke(e.NewValue);
+            }
         }
     }
 }

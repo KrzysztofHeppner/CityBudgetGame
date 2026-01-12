@@ -17,42 +17,33 @@ namespace CityBudget
 {
     public partial class MainWindow : Window
     {
-        private readonly Stopwatch _stopwatch = new();
         private Timer? _timer;
         DateTime currentDate = new(2000, 1, 1);
         bool isRunning = false;
-        float zadowolenie = 50.0f;
         bool canClose = true; bool wantClose = false;
 
-        Person[] citizens;
 
         PageInfo pageInfo = new PageInfo();
         PageTax pageTax = new PageTax();
 
+        private CityPopulationFunction _cityManager;
+        private double _cityBudget = 100000;
+        private double _taxRate = 0.15;
+
         public MainWindow()
         {
             InitializeComponent();
+            _cityManager = new CityPopulationFunction();
+            _cityManager.MakeNewPopulation(10000);
+            
 
-            _stopwatch.Start();
             _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
             MainFrame.Visibility = Visibility.Visible;
-            citizens = CityPopulationFunction.MakeNewPoplation(1000, 2.0f, 40.0f, 1.5f, 1.0f, 0.7f, 2.0f, 50000.0f);
-            foreach (var p in citizens)
-            {
-                pageInfo.output1.Text += $"ID: {p.id}, Wiek: {p.wiek}, Majatek: {p.majatek}, Dzieci: {p.iloscDzieci}, ParaID: {p.paraId}\n";
-            }
+            UpdateUI();
         }
-
-        
-
 
         private void MainTimerTick(object? state)
         {
-            //_ = DateTime.IsLeapYear(225) ? 366 : 365;
-            //_ = DateTime.DaysInMonth(2024, 2);
-
-
-
             if (isRunning)
             {
                 currentDate = currentDate.AddDays(1);
@@ -64,36 +55,55 @@ namespace CityBudget
                 if (currentDate.Day == 1)
                 {
                     MainNewMonth();
+                    if (currentDate.Month == 1)
+                    {
+                        MainNewYear();
+                    }
                 }
             }
-
-
         }
 
         private void MainNewDay()
+        {
+            UpdateUI();
+        }
+
+        private void MainNewMonth()
+        {
+            double taxes = _cityManager.CalculateTaxIncome(_taxRate);
+
+            double expenses = _cityManager.PopulationCount * 50;
+
+            _cityBudget += (taxes - expenses);
+        }
+
+        private void MainNewYear()
+        {
+            _cityManager.SimulateYear();
+
+            _cityManager.UpdateHappiness(_taxRate);
+        }
+
+        private void UpdateUI()
         {
             if (!wantClose)
             {
                 canClose = false;
                 Dispatcher.Invoke(() =>
                 {
-                    TimeText.Content = $"{currentDate.Day}.{currentDate.Month}.{currentDate.Year}";
-                    pageInfo.textBlockInfo.Text = isRunning ? "Running" : "Paused";
+                    TimeText.Content = $"{currentDate.Day:00}.{currentDate.Month:00}.{currentDate.Year}";
+                    pageInfo.textBlockInfo.Text = isRunning ? "Symulacja działa" : "Pauza";
+
                 });
                 canClose = true;
             }
         }
 
-        private void MainNewMonth()
-        {
-
-        }
 
         protected override void OnClosed(EventArgs e)
         {
             _timer?.Dispose();
             _timer = null;
-            _stopwatch.Stop();
             base.OnClosed(e);
         }
 
@@ -152,13 +162,21 @@ namespace CityBudget
 
         private void ButtonBlue_Click(object sender, RoutedEventArgs e)
         {
-            var pageGraph = new PageGraph(citizens);
+            var populationSnapshot = _cityManager.GetPopulationSnapshot();
+
+            var pageGraph = new PageGraph(populationSnapshot);
             MainFrame.Navigate(pageGraph);
         }
 
         private void ButtonYellow_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(pageInfo);
+            var taxPage = new PageTax(_cityBudget, _taxRate, (newRate) =>
+            {
+                _taxRate = newRate;
+            });
+
+            MainFrame.Navigate(taxPage);
+            //MainFrame.Navigate(pageInfo);
         }
     }
 }

@@ -13,7 +13,8 @@
         MinHeight="450"
         MinWidth="800"
         MaxHeight="450"
-        MaxWidth="800">
+        MaxWidth="800"
+        WindowStartupLocation="CenterScreen">
     <Border Background="#FF505050"
             CornerRadius="12"
             BorderBrush="Transparent"
@@ -39,7 +40,8 @@
                         Margin="0,150,0,0"
                         Name="BorderNewGame"
                         MouseEnter="ButtonNewGame_MouseEnter"
-                        MouseLeave="ButtonNewGame_MouseLeave">
+                        MouseLeave="ButtonNewGame_MouseLeave"
+                        MouseLeftButtonDown="ButtonNewGame_Click">
                     <Button Content="Nowa Gra"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,0"
@@ -84,7 +86,8 @@
                         Margin="0,200,0,0"
                         Name="BorderLoadGame"
                         MouseEnter="ButtonLoadGame_MouseEnter"
-                        MouseLeave="ButtonLoadGame_MouseLeave">
+                        MouseLeave="ButtonLoadGame_MouseLeave"
+                        MouseLeftButtonDown="ButtonLoadGame_Click">
                     <Button Content="Wczytaj"
                             HorizontalAlignment="Center"
                             Margin="0,0,0,0"
@@ -115,6 +118,67 @@
                         </Button.Style>
                     </Button>
                 </Border>
+                <Border BorderBrush="#888888"
+                        BorderThickness="1"
+                        Background="#1e1e1e"
+                        ClipToBounds="True"
+                        MinHeight="36"
+                        MinWidth="100"
+                        Width="100"
+                        Height="36"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        CornerRadius="18,18,18,18"
+                        Margin="0,250,0,0"
+                        Name="BorderLeave"
+                        MouseEnter="ButtonLeave_MouseEnter"
+                        MouseLeave="ButtonLeave_MouseLeave"
+                        MouseLeftButtonDown="ButtonLeave_Click">
+                    <Button Content="Opuść"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="ButtonLeave_Click"
+                            Background="Transparent"
+                            Foreground="#888888"
+                            FontSize="15"
+                            FontFamily="Arial"
+                            Name="ButtonLeave">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid>
+                                                <Ellipse Fill="{TemplateBinding Background}"
+                                                         x:Name="ButtonEllipse" />
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center" />
+
+
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Border>
+                <TextBlock Text="City Budget"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           Margin="0,50,0,0"
+                           FontSize="36"
+                           FontFamily="Arial"
+                           Foreground="#888888"
+                           FontWeight="Bold" />
+                <TextBlock Text="Wersja 0.1"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,5"
+                           FontSize="12"
+                           FontFamily="Arial"
+                           Foreground="#888888" />
             </Grid>
         </Border>
     </Border>
