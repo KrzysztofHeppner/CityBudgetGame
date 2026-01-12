@@ -101,9 +101,14 @@ namespace CityBudget
                 int potentialMothers = _population.Count(p => p.Gender == Gender.Female && p.Age >= 18 && p.Age <= 40);
                 int newBabies = 0;
 
-                foreach (var _ in Enumerable.Range(0, potentialMothers))
+                foreach (var mother in _population.Where(p => p.Gender == Gender.Female && p.Age >= 18 && p.Age <= 40))
                 {
-                    if (_random.NextDouble() < 0.1)
+                    double baseChance = 0.15;
+
+                    if (mother.Happiness < 30) baseChance = 0.02;
+                    else if (mother.Happiness > 80) baseChance = 0.25;
+
+                    if (_random.NextDouble() < baseChance)
                     {
                         newBabies++;
                     }
@@ -139,18 +144,34 @@ namespace CityBudget
         }
 
         /// <summary>
-        /// Aktualizuje poziom zadowolenia w zależności od podatków.
+        /// Aktualizuje zadowolenie mieszkańców na podstawie podatków.
+        /// Wywołuj to CO MIESIĄC, żeby gracz szybko widział reakcję.
         /// </summary>
-        public void UpdateHappiness(double taxRate)
+        public void UpdateHappiness(TaxSettings taxes)
         {
             lock (_populationLock)
             {
                 foreach (var person in _population)
                 {
-                    if (taxRate > 0.20) person.Happiness -= 5;
-                    else if (taxRate < 0.10) person.Happiness += 2;
+                    if (person.Happiness > 50) person.Happiness--;
+                    if (person.Happiness < 50) person.Happiness++;
 
-                    if (!person.IsEmployed && person.IsWorkingAge())
+                    if (person.IsEmployed)
+                    {
+                        if (taxes.PIT > 0.20) person.Happiness -= 3;
+                        else if (taxes.PIT < 0.10) person.Happiness += 2;
+                    }
+
+                    if (taxes.VAT > 0.23) person.Happiness -= 2;
+                    else if (taxes.VAT < 0.15) person.Happiness += 1;
+
+                    if (person.Age >= 18)
+                    {
+                        if (taxes.PropertyTax > 100) person.Happiness -= 2;
+                        else if (taxes.PropertyTax < 20) person.Happiness += 1;
+                    }
+
+                    if (person.Age >= 18 && person.Age < 65 && !person.IsEmployed)
                     {
                         person.Happiness -= 2;
                     }
@@ -215,6 +236,84 @@ namespace CityBudget
             }
 
             return report;
+        }
+
+        /// <summary>
+        /// Symuluje migrację ludności na podstawie zadowolenia.
+        /// Wywołuj co rok lub co miesiąc.
+        /// </summary>
+        public string HandleMigration()
+        {
+            int leftCity = 0;
+            int cameToCity = 0;
+
+            lock (_populationLock)
+            {
+                List<Person> peopleLeaving = new List<Person>();
+
+                foreach (var person in _population)
+                {
+                    if (person.Happiness < 20)
+                    {
+                        if (_random.NextDouble() < 0.10)
+                        {
+                            peopleLeaving.Add(person);
+                        }
+                    }
+                }
+
+                foreach (var p in peopleLeaving)
+                {
+                    _population.Remove(p);
+                }
+                leftCity = peopleLeaving.Count;
+
+
+                double avgHappiness = _population.Count > 0 ? _population.Average(p => p.Happiness) : 0;
+
+                if (avgHappiness > 60)
+                {
+                    int newPeopleCount = (int)((avgHappiness - 50) * (_population.Count * 0.005));
+
+                    for (int i = 0; i < newPeopleCount; i++)
+                    {
+                        int age = _random.Next(18, 40);
+                        Gender gender = (Gender)_random.Next(0, 2);
+                        var newPerson = new Person(age, gender);
+                        newPerson.Happiness = 50;
+
+                        newPerson.IsEmployed = _random.NextDouble() > 0.3;
+                        if (newPerson.IsEmployed) newPerson.Income = _random.Next(2500, 6000);
+
+                        _population.Add(newPerson);
+                    }
+                    cameToCity = newPeopleCount;
+                }
+            }
+
+            if (leftCity > cameToCity) return $"Kryzys! {leftCity} osób wyjechało.";
+            if (cameToCity > leftCity) return $"Rozwój! {cameToCity} nowych mieszkańców.";
+            return "Stabilizacja populacji.";
+        }
+
+        public double GetAverageHappiness()
+        {
+            lock (_populationLock)
+            {
+                if (_population.Count == 0) return 0;
+                return _population.Average(p => p.Happiness);
+            }
+        }
+
+        /// <summary>
+        /// Podmienia całą populację na tę wczytaną z pliku.
+        /// </summary>
+        public void LoadPopulation(List<Person> loadedPopulation)
+        {
+            lock (_populationLock)
+            {
+                _population = new List<Person>(loadedPopulation);
+            }
         }
     }
 }

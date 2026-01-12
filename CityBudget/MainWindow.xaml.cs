@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.IO;
+using System.Text.Json;
+using Microsoft.Win32;
 
 namespace CityBudget
 {
@@ -73,8 +76,12 @@ namespace CityBudget
         private void MainNewMonth()
         {
             FinanceReport report = _cityManager.CalculateFinances(_currentTaxSettings);
-
             _cityBudget += report.Balance;
+
+            _cityManager.UpdateHappiness(_currentTaxSettings);
+
+            string migrationStatus = _cityManager.HandleMigration();
+
 
             Dispatcher.Invoke(() =>
             {
@@ -89,7 +96,7 @@ namespace CityBudget
         {
             _cityManager.SimulateYear();
 
-            _cityManager.UpdateHappiness(_taxRate);
+            _cityManager.UpdateHappiness(_currentTaxSettings);
             
             Dispatcher.Invoke(() =>
             {
@@ -111,6 +118,12 @@ namespace CityBudget
                     TimeText.Content = $"{currentDate.Day:00}.{currentDate.Month:00}.{currentDate.Year}";
                     pageInfo.textBlockInfo.Text = isRunning ? "Symulacja działa" : "Pauza";
 
+                    double avgHappy = _cityManager.GetAverageHappiness();
+                    HappinessLabel.Content = $"Zadowolenie: {avgHappy:F0}/100";
+
+                    if (avgHappy < 40) HappinessLabel.Foreground = Brushes.Red;
+                    else if (avgHappy > 70) HappinessLabel.Foreground = Brushes.LightGreen;
+                    else HappinessLabel.Foreground = Brushes.White;
                 });
                 canClose = true;
             }
@@ -194,6 +207,96 @@ namespace CityBudget
 
             MainFrame.Navigate(pageTax);
             //MainFrame.Navigate(pageInfo);
+        }
+
+        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+        {
+            SaveGame();
+        }
+
+        private void ButtonLoad_Click(object sender, RoutedEventArgs e)
+        {
+            LoadGame();
+        }
+
+        private void SaveGame()
+        {
+            bool wasRunning = isRunning;
+            isRunning = false;
+
+            try
+            {
+                var state = new GameState
+                {
+                    Budget = _cityBudget,
+                    CurrentDate = currentDate,
+                    Taxes = _currentTaxSettings,
+                    Population = _cityManager.GetPopulationSnapshot()
+                };
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(state, options);
+
+                SaveFileDialog saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "City Save File (*.json)|*.json";
+                saveDialog.FileName = $"CitySave_{currentDate:yyyy-MM-dd}";
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    File.WriteAllText(saveDialog.FileName, jsonString);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd zapisu: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                isRunning = wasRunning;
+                UpdateUI();
+            }
+        }
+
+        public void LoadGame()
+        {
+            bool wasRunning = isRunning;
+            isRunning = false;
+
+            try
+            {
+                OpenFileDialog openDialog = new OpenFileDialog();
+                openDialog.Filter = "City Save File (*.json)|*.json";
+
+                if (openDialog.ShowDialog() == true)
+                {
+                    string jsonString = File.ReadAllText(openDialog.FileName);
+
+                    GameState? state = JsonSerializer.Deserialize<GameState>(jsonString);
+
+                    if (state != null)
+                    {
+                        _cityBudget = state.Budget;
+                        currentDate = state.CurrentDate;
+                        _currentTaxSettings = state.Taxes ?? new TaxSettings();
+
+                        if (state.Population != null)
+                        {
+                            _cityManager.LoadPopulation(state.Population);
+                        }
+
+                        UpdateUI();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Nie udało się wczytać zapisu: {ex.Message}\nPlik może być uszkodzony.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                isRunning = false;
+                UpdateUI();
+            }
         }
     }
 }

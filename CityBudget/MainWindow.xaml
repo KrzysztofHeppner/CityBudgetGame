@@ -156,6 +156,34 @@
                           VerticalAlignment="Top"
                           Margin="0,0,0,0">
 
+                        <Label x:Name="HappinessLabel"
+                               Content="Zadowolenie: 50%"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Top"
+                               Margin="0,40,250,0"
+                               Foreground="White"
+                               FontSize="16" />
+
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="0,40,400,0">
+                            <Button Content="ZAPISZ"
+                                    Click="ButtonSave_Click"
+                                    Width="80"
+                                    Height="30"
+                                    Margin="5"
+                                    Background="#444"
+                                    Foreground="White" />
+                            <Button Content="WCZYTAJ"
+                                    Click="ButtonLoad_Click"
+                                    Width="80"
+                                    Height="30"
+                                    Margin="5"
+                                    Background="#444"
+                                    Foreground="White" />
+                        </StackPanel>
+
                         <Border BorderBrush="#FF505050"
                                 BorderThickness="1"
                                 Background="Transparent"

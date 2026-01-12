@@ -34,7 +34,12 @@ namespace CityBudget
         }
         private void ButtonLoadGame_Click(object sender, RoutedEventArgs e)
         {
-            
+            MainWindow mainWindow = new();
+            this.Hide();
+            mainWindow.Show();
+            mainWindow.LoadGame();
+            Application.Current.MainWindow = mainWindow;
+            this.Close();
         }
         private void ButtonLeave_Click(object sender, RoutedEventArgs e)
         {
