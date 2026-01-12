@@ -25,10 +25,12 @@ namespace CityBudget
 
         PageInfo pageInfo = new PageInfo();
         PageTax pageTax = new PageTax();
+        PageGraph pageGraph = new PageGraph();
 
         private CityPopulationFunction _cityManager;
         private double _cityBudget = 100000;
         private double _taxRate = 0.15;
+        private TaxSettings _currentTaxSettings = new TaxSettings();
 
         public MainWindow()
         {
@@ -37,7 +39,7 @@ namespace CityBudget
             _cityManager.MakeNewPopulation(10000);
             
 
-            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
+            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(2));
             MainFrame.Visibility = Visibility.Visible;
             UpdateUI();
         }
@@ -46,10 +48,10 @@ namespace CityBudget
         {
             if (isRunning)
             {
-                currentDate = currentDate.AddDays(1);
+                currentDate = currentDate.AddHours(6);
             }
 
-            if (currentDate.Hour == 0)
+            if (currentDate.Hour == 0 && isRunning)
             {
                 MainNewDay();
                 if (currentDate.Day == 1)
@@ -70,11 +72,17 @@ namespace CityBudget
 
         private void MainNewMonth()
         {
-            double taxes = _cityManager.CalculateTaxIncome(_taxRate);
+            FinanceReport report = _cityManager.CalculateFinances(_currentTaxSettings);
 
-            double expenses = _cityManager.PopulationCount * 50;
+            _cityBudget += report.Balance;
 
-            _cityBudget += (taxes - expenses);
+            Dispatcher.Invoke(() =>
+            {
+                if (MainFrame.Content == pageTax)
+                {
+                    ButtonYellow_Click(null, null);
+                }
+            });
         }
 
         private void MainNewYear()
@@ -82,6 +90,15 @@ namespace CityBudget
             _cityManager.SimulateYear();
 
             _cityManager.UpdateHappiness(_taxRate);
+            
+            Dispatcher.Invoke(() =>
+            {
+                if (MainFrame.Content == pageGraph)
+                {
+                    ButtonBlue_Click(null, null);
+                }
+            });
+            
         }
 
         private void UpdateUI()
@@ -160,22 +177,22 @@ namespace CityBudget
 
         #endregion
 
-        private void ButtonBlue_Click(object sender, RoutedEventArgs e)
+        private void ButtonBlue_Click(object? sender, RoutedEventArgs? e)
         {
             var populationSnapshot = _cityManager.GetPopulationSnapshot();
 
-            var pageGraph = new PageGraph(populationSnapshot);
+            pageGraph = new PageGraph(populationSnapshot);
             MainFrame.Navigate(pageGraph);
         }
 
-        private void ButtonYellow_Click(object sender, RoutedEventArgs e)
+        private void ButtonYellow_Click(object? sender, RoutedEventArgs? e)
         {
-            var taxPage = new PageTax(_cityBudget, _taxRate, (newRate) =>
+            pageTax = new PageTax(_cityBudget, _currentTaxSettings, _cityManager, (newSettings) =>
             {
-                _taxRate = newRate;
+                _currentTaxSettings = newSettings;
             });
 
-            MainFrame.Navigate(taxPage);
+            MainFrame.Navigate(pageTax);
             //MainFrame.Navigate(pageInfo);
         }
     }

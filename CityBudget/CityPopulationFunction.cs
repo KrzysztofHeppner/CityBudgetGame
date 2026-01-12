@@ -43,7 +43,7 @@ namespace CityBudget
         /// <param name="initialCount">Liczba mieszkańców na start</param>
         public void MakeNewPopulation(int initialCount)
         {
-            lock (_populationLock) // Zamykamy dostęp
+            lock (_populationLock)
             {
                 _population.Clear();
 
@@ -103,7 +103,7 @@ namespace CityBudget
 
                 foreach (var _ in Enumerable.Range(0, potentialMothers))
                 {
-                    if (_random.NextDouble() < 0.15)
+                    if (_random.NextDouble() < 0.1)
                     {
                         newBabies++;
                     }
@@ -170,6 +170,51 @@ namespace CityBudget
                 if (_population.Count == 0) return 0;
                 return _population.Average(p => p.Age);
             }
+        }
+
+        /// <summary>
+        /// Oblicza szczegółowy bilans miesięczny.
+        /// </summary>
+        public FinanceReport CalculateFinances(TaxSettings taxes)
+        {
+            var report = new FinanceReport();
+
+            lock (_populationLock)
+            {
+                foreach (var person in _population)
+                {
+                    if (person.IsEmployed)
+                    {
+                        double taxValue = person.Income * taxes.PIT;
+                        report.IncomePIT += taxValue;
+
+                        double netIncome = person.Income - taxValue;
+                        double spending = netIncome * 0.8;
+                        report.IncomeVAT += spending * taxes.VAT;
+                    }
+
+                    if (person.Age >= 18)
+                    {
+                        report.IncomeProperty += taxes.PropertyTax;
+                    }
+                }
+
+                int students = _population.Count(p => p.Age >= 6 && p.Age <= 24);
+                report.ExpenseEducation = students * 300;
+
+                int seniors = _population.Count(p => p.Age > 65);
+                int babies = _population.Count(p => p.Age < 5);
+                int others = _population.Count - (seniors + babies);
+                report.ExpenseHealthcare = (seniors * 400) + (babies * 200) + (others * 50);
+
+                report.ExpenseSecurity = _population.Count * 40;
+
+                report.ExpenseInfrastructure = 50000 + (_population.Count * 10);
+
+                report.ExpenseAdministration = 20000;
+            }
+
+            return report;
         }
     }
 }

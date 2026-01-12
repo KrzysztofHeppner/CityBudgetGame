@@ -11,6 +11,7 @@ namespace CityBudget
     {
         private List<Person> _population;
 
+        public PageGraph() { InitializeComponent(); }
         public PageGraph(List<Person> population)
         {
             InitializeComponent();
