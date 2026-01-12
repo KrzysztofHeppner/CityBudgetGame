@@ -15,14 +15,14 @@ namespace CityBudget
         public Gender Gender { get; set; }
         public double Income { get; set; }
         public bool IsEmployed { get; set; }
-        public int Happiness { get; set; }
+        public double Happiness { get; set; }
 
         public Person(int age, Gender gender)
         {
             Id = Guid.NewGuid();
             Age = age;
             Gender = gender;
-            Happiness = 50;
+            Happiness = 50.0;
             IsEmployed = false;
             Income = 0;
         }

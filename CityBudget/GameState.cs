@@ -8,6 +8,7 @@ namespace CityBudget
         public double Budget { get; set; }
         public DateTime CurrentDate { get; set; }
         public TaxSettings Taxes { get; set; }
+        public BudgetPolicy Policy { get; set; }
         public List<Person> Population { get; set; }
     }
 }

@@ -49,7 +49,7 @@ namespace CityBudget
 
                 for (int i = 0; i < initialCount; i++)
                 {
-                    int age = _random.Next(0, 80);
+                    int age = _random.Next(0, 90);
 
                     Gender gender = (Gender)_random.Next(0, 2);
 
@@ -103,9 +103,9 @@ namespace CityBudget
 
                 foreach (var mother in _population.Where(p => p.Gender == Gender.Female && p.Age >= 18 && p.Age <= 40))
                 {
-                    double baseChance = 0.15;
+                    double baseChance = 0.10;
 
-                    if (mother.Happiness < 30) baseChance = 0.02;
+                    if (mother.Happiness < 30) baseChance = 0.01;
                     else if (mother.Happiness > 80) baseChance = 0.25;
 
                     if (_random.NextDouble() < baseChance)
@@ -145,38 +145,81 @@ namespace CityBudget
 
         /// <summary>
         /// Aktualizuje zadowolenie mieszkańców na podstawie podatków.
-        /// Wywołuj to CO MIESIĄC, żeby gracz szybko widział reakcję.
         /// </summary>
-        public void UpdateHappiness(TaxSettings taxes)
+        public void UpdateHappiness(TaxSettings taxes, BudgetPolicy policy)
         {
             lock (_populationLock)
             {
                 foreach (var person in _population)
                 {
-                    if (person.Happiness > 50) person.Happiness--;
-                    if (person.Happiness < 50) person.Happiness++;
+                    double change = 0.0;
 
                     if (person.IsEmployed)
                     {
-                        if (taxes.PIT > 0.20) person.Happiness -= 3;
-                        else if (taxes.PIT < 0.10) person.Happiness += 2;
+                        change -= (taxes.PIT * 30.0);
+                        if(taxes.PIT > 0.25)
+                        {
+                            change -= (taxes.PIT - 0.25) * 30.0;
+                        }
                     }
 
-                    if (taxes.VAT > 0.23) person.Happiness -= 2;
-                    else if (taxes.VAT < 0.15) person.Happiness += 1;
+                    change -= (taxes.VAT * 30.0);
+                    if (taxes.VAT > 0.25)
+                    {
+                        change -= (taxes.VAT - 0.25) * 30.0;
+                    }
 
                     if (person.Age >= 18)
                     {
-                        if (taxes.PropertyTax > 100) person.Happiness -= 2;
-                        else if (taxes.PropertyTax < 20) person.Happiness += 1;
+                        change -= (taxes.PropertyTax / 200.0);
+                        if (taxes.PropertyTax / 200.0 > 1.0)
+                        {
+                            change -= (taxes.PropertyTax / 200.0 - 1.0) * 20.0;
+                        }
                     }
 
-                    if (person.Age >= 18 && person.Age < 65 && !person.IsEmployed)
+                    change += (policy.Education) * 2.0;
+
+                    double healthWeight = person.Age > 60 ? 5.0 : 4.0;
+                    change += (policy.Healthcare) * healthWeight;
+
+                    change += (policy.Police) * 1;
+                    change += (policy.FireDept) * 1;
+
+                    if (person.IsEmployed)
                     {
-                        person.Happiness -= 2;
+                        change += (policy.Roads) * 2.0;
+                    }
+                    else
+                    {
+                        change += (policy.Roads) * 0.5;
                     }
 
-                    person.Happiness = Math.Clamp(person.Happiness, 0, 100);
+                    change += (policy.Administration) * 1.0;
+
+
+                    if (person.Happiness > 60)
+                    {
+                        change -= 3;
+                        if (change < 0)
+                        {
+                            change = 0;
+                        }
+                    }
+                    if (person.Happiness < 40)
+                    {
+                        change += 3;
+                        if (change > 0)
+                        {
+                            change = 0;
+                        }
+                    }
+                    if (person.IsEmployed) 
+                    { 
+                    }
+                    person.Happiness += change;
+
+                    person.Happiness = Math.Clamp(person.Happiness, 0.0, 100.0);
                 }
             }
         }
@@ -196,7 +239,7 @@ namespace CityBudget
         /// <summary>
         /// Oblicza szczegółowy bilans miesięczny.
         /// </summary>
-        public FinanceReport CalculateFinances(TaxSettings taxes)
+        public FinanceReport CalculateFinances(TaxSettings taxes, BudgetPolicy policy)
         {
             var report = new FinanceReport();
 
@@ -206,33 +249,31 @@ namespace CityBudget
                 {
                     if (person.IsEmployed)
                     {
-                        double taxValue = person.Income * taxes.PIT;
-                        report.IncomePIT += taxValue;
-
-                        double netIncome = person.Income - taxValue;
-                        double spending = netIncome * 0.8;
-                        report.IncomeVAT += spending * taxes.VAT;
+                        double pitVal = person.Income * taxes.PIT;
+                        report.IncomePIT += pitVal;
+                        double netIncome = person.Income - pitVal;
+                        report.IncomeVAT += (netIncome * 0.8) * taxes.VAT;
                     }
-
-                    if (person.Age >= 18)
-                    {
-                        report.IncomeProperty += taxes.PropertyTax;
-                    }
+                    if (person.Age >= 18) report.IncomeProperty += taxes.PropertyTax;
                 }
 
                 int students = _population.Count(p => p.Age >= 6 && p.Age <= 24);
-                report.ExpenseEducation = students * 300;
+                report.ExpenseEducation = students * 300 * policy.Education;
 
                 int seniors = _population.Count(p => p.Age > 65);
                 int babies = _population.Count(p => p.Age < 5);
                 int others = _population.Count - (seniors + babies);
-                report.ExpenseHealthcare = (seniors * 400) + (babies * 200) + (others * 50);
+                double baseHealthCost = (seniors * 1000) + (babies * 400) + (others * 50);
+                report.ExpenseHealthcare = baseHealthCost * policy.Healthcare;
 
-                report.ExpenseSecurity = _population.Count * 40;
+                report.ExpensePolice = _population.Count * 25 * policy.Police;
 
-                report.ExpenseInfrastructure = 50000 + (_population.Count * 10);
+                report.ExpenseFireDept = _population.Count * 15 * policy.FireDept;
 
-                report.ExpenseAdministration = 20000;
+                double baseRoads = 30000 + (_population.Count * 10);
+                report.ExpenseRoads = baseRoads * policy.Roads;
+
+                report.ExpenseAdministration = 200000 * policy.Administration;
             }
 
             return report;
@@ -240,62 +281,102 @@ namespace CityBudget
 
         /// <summary>
         /// Symuluje migrację ludności na podstawie zadowolenia.
-        /// Wywołuj co rok lub co miesiąc.
+        /// Dorośli zabierają ze sobą dzieci.
         /// </summary>
         public string HandleMigration()
         {
-            int leftCity = 0;
+            int adultsLeft = 0;
+            int childrenLeft = 0;
             int cameToCity = 0;
 
             lock (_populationLock)
             {
-                List<Person> peopleLeaving = new List<Person>();
+                var unhappyAdults = _population
+                    .Where(p => p.Age >= 18 && p.Happiness < 25)
+                    .ToList();
 
-                foreach (var person in _population)
+                List<Person> peopleToLeave = new List<Person>();
+
+                var childrenPool = new Queue<Person>(_population.Where(p => p.Age < 18));
+
+                foreach (var adult in unhappyAdults)
                 {
-                    if (person.Happiness < 20)
+                    if (_random.NextDouble() < 0.10)
                     {
-                        if (_random.NextDouble() < 0.10)
+                        peopleToLeave.Add(adult);
+                        adultsLeft++;
+
+                        if (adult.Age >= 20 && adult.Age <= 50)
                         {
-                            peopleLeaving.Add(person);
+                            double childChance = _random.NextDouble();
+                            int kidsToTake = 0;
+
+                            if (childChance > 0.4 && childChance <= 0.8) kidsToTake = 1;
+                            else if (childChance > 0.8) kidsToTake = 2;
+
+                            for (int i = 0; i < kidsToTake; i++)
+                            {
+                                if (childrenPool.Count > 0)
+                                {
+                                    var child = childrenPool.Dequeue();
+                                    peopleToLeave.Add(child);
+                                    childrenLeft++;
+                                }
+                            }
                         }
                     }
                 }
 
-                foreach (var p in peopleLeaving)
+                foreach (var p in peopleToLeave)
                 {
                     _population.Remove(p);
                 }
-                leftCity = peopleLeaving.Count;
 
 
                 double avgHappiness = _population.Count > 0 ? _population.Average(p => p.Happiness) : 0;
 
-                if (avgHappiness > 60)
+                if (avgHappiness > 65)
                 {
-                    int newPeopleCount = (int)((avgHappiness - 50) * (_population.Count * 0.005));
+                    int newAdultsCount = (int)((avgHappiness - 65) * (_population.Count * 0.0005));
 
-                    for (int i = 0; i < newPeopleCount; i++)
+                    for (int i = 0; i < newAdultsCount; i++)
                     {
-                        int age = _random.Next(18, 40);
+                        int age = _random.Next(20, 80);
                         Gender gender = (Gender)_random.Next(0, 2);
                         var newPerson = new Person(age, gender);
-                        newPerson.Happiness = 50;
-
-                        newPerson.IsEmployed = _random.NextDouble() > 0.3;
+                        newPerson.Happiness = 60;
+                        newPerson.IsEmployed = _random.NextDouble() > 0.2;
                         if (newPerson.IsEmployed) newPerson.Income = _random.Next(2500, 6000);
 
                         _population.Add(newPerson);
+                        cameToCity++;
+
+                        if (_random.NextDouble() < 0.30)
+                        {
+                            var newChild = new Person(_random.Next(0, 10), (Gender)_random.Next(0, 2));
+                            newChild.Happiness = 60;
+                            _population.Add(newChild);
+                            cameToCity++;
+                        }
                     }
-                    cameToCity = newPeopleCount;
                 }
             }
 
-            if (leftCity > cameToCity) return $"Kryzys! {leftCity} osób wyjechało.";
-            if (cameToCity > leftCity) return $"Rozwój! {cameToCity} nowych mieszkańców.";
-            return "Stabilizacja populacji.";
+            int totalLeft = adultsLeft + childrenLeft;
+
+            if (totalLeft > cameToCity)
+                return $"Kryzys! Wyjechało {adultsLeft} dorosłych i {childrenLeft} dzieci.";
+
+            if (cameToCity > totalLeft)
+                return $"Rozwój! Przybyło {cameToCity} nowych mieszkańców.";
+
+            return "Migracja stabilna.";
         }
 
+        /// <summary>
+        /// Średnie zadowolenie mieszkańców.
+        /// </summary>
+        /// <returns></returns>
         public double GetAverageHappiness()
         {
             lock (_populationLock)
@@ -315,5 +396,7 @@ namespace CityBudget
                 _population = new List<Person>(loadedPopulation);
             }
         }
+
+
     }
 }

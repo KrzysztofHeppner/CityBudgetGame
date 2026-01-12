@@ -34,6 +34,7 @@ namespace CityBudget
         private double _cityBudget = 100000;
         private double _taxRate = 0.15;
         private TaxSettings _currentTaxSettings = new TaxSettings();
+        private BudgetPolicy _currentBudgetPolicy = new BudgetPolicy();
 
         public MainWindow()
         {
@@ -75,11 +76,11 @@ namespace CityBudget
 
         private void MainNewMonth()
         {
-            FinanceReport report = _cityManager.CalculateFinances(_currentTaxSettings);
+            FinanceReport report = _cityManager.CalculateFinances(_currentTaxSettings, _currentBudgetPolicy);
             _cityBudget += report.Balance;
 
-            _cityManager.UpdateHappiness(_currentTaxSettings);
-
+            _cityManager.UpdateHappiness(_currentTaxSettings, _currentBudgetPolicy);
+            
             string migrationStatus = _cityManager.HandleMigration();
 
 
@@ -96,7 +97,7 @@ namespace CityBudget
         {
             _cityManager.SimulateYear();
 
-            _cityManager.UpdateHappiness(_currentTaxSettings);
+            _cityManager.UpdateHappiness(_currentTaxSettings, _currentBudgetPolicy);
             
             Dispatcher.Invoke(() =>
             {
@@ -124,6 +125,8 @@ namespace CityBudget
                     if (avgHappy < 40) HappinessLabel.Foreground = Brushes.Red;
                     else if (avgHappy > 70) HappinessLabel.Foreground = Brushes.LightGreen;
                     else HappinessLabel.Foreground = Brushes.White;
+
+                    PeopleLabel.Content = $"Ludność: {_cityManager.PopulationCount}";
                 });
                 canClose = true;
             }
@@ -200,9 +203,11 @@ namespace CityBudget
 
         private void ButtonYellow_Click(object? sender, RoutedEventArgs? e)
         {
-            pageTax = new PageTax(_cityBudget, _currentTaxSettings, _cityManager, (newSettings) =>
+            pageTax = new PageTax(_cityBudget, _currentTaxSettings, _currentBudgetPolicy, _cityManager,
+            (newTaxes, newPolicy) =>
             {
-                _currentTaxSettings = newSettings;
+                _currentTaxSettings = newTaxes;
+                _currentBudgetPolicy = newPolicy;
             });
 
             MainFrame.Navigate(pageTax);
@@ -231,6 +236,7 @@ namespace CityBudget
                     Budget = _cityBudget,
                     CurrentDate = currentDate,
                     Taxes = _currentTaxSettings,
+                    Policy = _currentBudgetPolicy,
                     Population = _cityManager.GetPopulationSnapshot()
                 };
 
@@ -278,6 +284,7 @@ namespace CityBudget
                         _cityBudget = state.Budget;
                         currentDate = state.CurrentDate;
                         _currentTaxSettings = state.Taxes ?? new TaxSettings();
+                        _currentBudgetPolicy = state.Policy ?? new BudgetPolicy();
 
                         if (state.Population != null)
                         {

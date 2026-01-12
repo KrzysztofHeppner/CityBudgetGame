@@ -6,17 +6,18 @@
 
     <Grid Background="#2D2D30">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1.2*" />
+            <ColumnDefinition Width="1.5*" />
+            <ColumnDefinition Width="1.2*" />
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0"
-                    Margin="20">
-            <TextBlock Text="PRZYCHODY (Podatki)"
-                       Foreground="White"
-                       FontSize="20"
+                    Margin="10">
+            <TextBlock Text="PODATKI (PRZYCHODY)"
+                       Foreground="#88FF88"
+                       FontSize="16"
                        FontWeight="Bold"
-                       Margin="0,0,0,20" />
+                       Margin="0,0,0,10" />
 
             <TextBlock Text="PIT (Dochodowy)"
                        Foreground="#AAA" />
@@ -43,7 +44,7 @@
                        Foreground="White"
                        HorizontalAlignment="Right" />
 
-            <TextBlock Text="Podatek od nieruchomości (kwota)"
+            <TextBlock Text="Nieruchomości (stały)"
                        Foreground="#AAA"
                        Margin="0,10,0,0" />
             <Slider x:Name="SliderProp"
@@ -56,127 +57,155 @@
                        Foreground="White"
                        HorizontalAlignment="Right" />
 
-            <Separator Margin="0,20"
-                       Background="#555" />
-
-            <TextBlock Text="Budżet całkowity:"
-                       Foreground="#AAA" />
-            <TextBlock x:Name="BudgetDisplay"
-                       Text="100 000 PLN"
-                       Foreground="#4CAF50"
-                       FontSize="26"
-                       FontWeight="Bold" />
+            <TextBlock Text="Im wyższe podatki, tym większe niezadowolenie!"
+                       Foreground="Gray"
+                       TextWrapping="Wrap"
+                       Margin="0,20,0,0"
+                       FontSize="10"
+                       FontStyle="Italic" />
         </StackPanel>
 
-        <StackPanel Grid.Column="1"
-                    Margin="20"
-                    Background="#333333">
-            <TextBlock Text="RAPORT MIESIĘCZNY"
-                       Foreground="White"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Margin="10" />
-
-            <Grid Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="20" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
-                           Text="Edukacja:"
-                           Foreground="#DDD" />
-                <TextBlock Grid.Row="0"
-                           Grid.Column="1"
-                           x:Name="ValEdu"
-                           Text="-0 PLN"
-                           Foreground="#FF8888" />
-
-                <TextBlock Grid.Row="1"
-                           Text="Służba Zdrowia:"
-                           Foreground="#DDD" />
-                <TextBlock Grid.Row="1"
-                           Grid.Column="1"
-                           x:Name="ValHealth"
-                           Text="-0 PLN"
-                           Foreground="#FF8888" />
-
-                <TextBlock Grid.Row="2"
-                           Text="Bezpieczeństwo:"
-                           Foreground="#DDD" />
-                <TextBlock Grid.Row="2"
-                           Grid.Column="1"
-                           x:Name="ValSec"
-                           Text="-0 PLN"
-                           Foreground="#FF8888" />
-
-                <TextBlock Grid.Row="3"
-                           Text="Infrastruktura:"
-                           Foreground="#DDD" />
-                <TextBlock Grid.Row="3"
-                           Grid.Column="1"
-                           x:Name="ValInfra"
-                           Text="-0 PLN"
-                           Foreground="#FF8888" />
-
-                <TextBlock Grid.Row="4"
-                           Text="Administracja:"
-                           Foreground="#DDD" />
-                <TextBlock Grid.Row="4"
-                           Grid.Column="1"
-                           x:Name="ValAdmin"
-                           Text="-0 PLN"
-                           Foreground="#FF8888" />
-
-                <TextBlock Grid.Row="6"
-                           Text="Suma Wydatków:"
+        <ScrollViewer Grid.Column="1"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="10">
+                <TextBlock Text="FINANSOWANIE USŁUG"
+                           Foreground="#FF8888"
+                           FontSize="16"
                            FontWeight="Bold"
-                           Foreground="White" />
-                <TextBlock Grid.Row="6"
-                           Grid.Column="1"
-                           x:Name="ValTotalExp"
-                           Text="-0 PLN"
-                           Foreground="#FF5555"
-                           FontWeight="Bold" />
+                           Margin="0,0,0,10" />
+                <TextBlock Text="(&lt;100% obniża zadowolenie, >100% zwiększa)"
+                           Foreground="Gray"
+                           FontSize="10"
+                           Margin="0,0,0,10" />
 
-                <TextBlock Grid.Row="7"
-                           Text="Suma Przychodu (est.):"
+                <TextBlock Text="Szkoły i Edukacja"
+                           Foreground="#DDD" />
+                <Slider x:Name="Sl_Edu"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Edu"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+
+                <TextBlock Text="Szpitale (Zdrowie)"
+                           Foreground="#DDD"
+                           Margin="0,5,0,0" />
+                <Slider x:Name="Sl_Health"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Health"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+
+                <TextBlock Text="Policja"
+                           Foreground="#DDD"
+                           Margin="0,5,0,0" />
+                <Slider x:Name="Sl_Police"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Police"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+
+                <TextBlock Text="Straż Pożarna"
+                           Foreground="#DDD"
+                           Margin="0,5,0,0" />
+                <Slider x:Name="Sl_Fire"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Fire"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+
+                <TextBlock Text="Drogi i Infrastruktura"
+                           Foreground="#DDD"
+                           Margin="0,5,0,0" />
+                <Slider x:Name="Sl_Roads"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Roads"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+
+                <TextBlock Text="Urzędy (Administracja)"
+                           Foreground="#DDD"
+                           Margin="0,5,0,0" />
+                <Slider x:Name="Sl_Admin"
+                        Minimum="0.5"
+                        Maximum="2.0"
+                        TickFrequency="0.1"
+                        ValueChanged="Sliders_ValueChanged" />
+                <TextBlock x:Name="Tx_Admin"
+                           Text="100%"
+                           Foreground="White"
+                           HorizontalAlignment="Right" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Column="2"
+                Background="#333"
+                Margin="5">
+            <StackPanel Margin="10">
+                <TextBlock Text="BILANS"
+                           Foreground="White"
+                           FontSize="16"
                            FontWeight="Bold"
-                           Foreground="White" />
-                <TextBlock Grid.Row="7"
-                           Grid.Column="1"
-                           x:Name="ValTotalInc"
+                           HorizontalAlignment="Center" />
+                <Separator Margin="0,5"
+                           Background="#555" />
+
+                <TextBlock Text="Przychody:"
+                           FontWeight="Bold"
+                           Foreground="#88FF88" />
+                <TextBlock x:Name="ValTotalInc"
                            Text="+0 PLN"
-                           Foreground="#66FF66"
-                           FontWeight="Bold" />
+                           Foreground="#88FF88"
+                           Margin="0,0,0,10" />
 
-                <TextBlock Grid.Row="8"
-                           Text="MIESIĘCZNY BILANS:"
-                           FontSize="16"
+                <TextBlock Text="Wydatki:"
                            FontWeight="Bold"
-                           Foreground="White"
-                           Margin="0,10,0,0" />
-                <TextBlock Grid.Row="8"
-                           Grid.Column="1"
-                           x:Name="ValBalance"
+                           Foreground="#FF8888" />
+                <TextBlock x:Name="ValTotalExp"
+                           Text="-0 PLN"
+                           Foreground="#FF8888"
+                           Margin="0,0,0,10" />
+
+                <TextBlock Text="MIESIĘCZNIE:"
+                           FontSize="14"
+                           FontWeight="Bold"
+                           Foreground="White" />
+                <TextBlock x:Name="ValBalance"
                            Text="0 PLN"
-                           FontSize="16"
+                           FontSize="18"
                            FontWeight="Bold"
                            Foreground="White"
-                           Margin="0,10,0,0" />
+                           Margin="0,5" />
 
-            </Grid>
-        </StackPanel>
+                <Separator Margin="0,20"
+                           Background="#555" />
+                <TextBlock Text="Budżet całkowity:"
+                           Foreground="#AAA" />
+                <TextBlock x:Name="BudgetDisplay"
+                           Text="100 000 PLN"
+                           Foreground="#4CAF50"
+                           FontSize="20"
+                           FontWeight="Bold" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>
