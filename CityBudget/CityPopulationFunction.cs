@@ -156,17 +156,17 @@ namespace CityBudget
 
                     if (person.IsEmployed)
                     {
-                        change -= (taxes.PIT * 30.0);
+                        change -= (taxes.PIT * 20.0);
                         if(taxes.PIT > 0.25)
                         {
-                            change -= (taxes.PIT - 0.25) * 30.0;
+                            change -= (taxes.PIT - 0.25) * 20.0;
                         }
                     }
 
-                    change -= (taxes.VAT * 30.0);
+                    change -= (taxes.VAT * 20.0);
                     if (taxes.VAT > 0.25)
                     {
-                        change -= (taxes.VAT - 0.25) * 30.0;
+                        change -= (taxes.VAT - 0.25) * 20.0;
                     }
 
                     if (person.Age >= 18)
@@ -180,22 +180,22 @@ namespace CityBudget
 
                     change += (policy.Education) * 2.0;
 
-                    double healthWeight = person.Age > 60 ? 5.0 : 4.0;
+                    double healthWeight = person.Age > 60 ? 5.0 : 2.0;
                     change += (policy.Healthcare) * healthWeight;
 
-                    change += (policy.Police) * 1;
-                    change += (policy.FireDept) * 1;
+                    change += (policy.Police) * 0.7;
+                    change += (policy.FireDept) * 0.7;
 
                     if (person.IsEmployed)
                     {
-                        change += (policy.Roads) * 2.0;
+                        change += (policy.Roads) * 2;
                     }
                     else
                     {
-                        change += (policy.Roads) * 0.5;
+                        change += (policy.Roads) * 0.1;
                     }
 
-                    change += (policy.Administration) * 1.0;
+                    change += (policy.Administration) * 0.5;
 
 
                     if (person.Happiness > 60)
@@ -301,7 +301,7 @@ namespace CityBudget
 
                 foreach (var adult in unhappyAdults)
                 {
-                    if (_random.NextDouble() < 0.10)
+                    if (_random.NextDouble() < 0.05)
                     {
                         peopleToLeave.Add(adult);
                         adultsLeft++;
@@ -394,6 +394,21 @@ namespace CityBudget
             lock (_populationLock)
             {
                 _population = new List<Person>(loadedPopulation);
+            }
+        }
+
+        /// <summary>
+        /// Aplikuje jednorazowy efekt decyzji (zmiana zadowolenia).
+        /// </summary>
+        public void ApplyDirectHappinessChange(double amount)
+        {
+            lock (_populationLock)
+            {
+                foreach (var person in _population)
+                {
+                    person.Happiness += amount;
+                    person.Happiness = Math.Clamp(person.Happiness, 0.0, 100.0);
+                }
             }
         }
 

@@ -29,6 +29,7 @@ namespace CityBudget
         PageInfo pageInfo = new PageInfo();
         PageTax pageTax = new PageTax();
         PageGraph pageGraph = new PageGraph();
+        PageDecisions pageDecisions = new PageDecisions();
 
         private CityPopulationFunction _cityManager;
         private double _cityBudget = 100000;
@@ -43,7 +44,7 @@ namespace CityBudget
             _cityManager.MakeNewPopulation(10000);
             
 
-            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(2));
+            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
             MainFrame.Visibility = Visibility.Visible;
             UpdateUI();
         }
@@ -83,12 +84,19 @@ namespace CityBudget
             
             string migrationStatus = _cityManager.HandleMigration();
 
-
             Dispatcher.Invoke(() =>
             {
                 if (MainFrame.Content == pageTax)
                 {
                     ButtonYellow_Click(null, null);
+                }
+                if (MainFrame.Content == pageGraph)
+                {
+                    ButtonBlue_Click(null, null);
+                }
+                if (MainFrame.Content == pageDecisions)
+                {
+                    ButtonRed_Click(null, null);
                 }
             });
         }
@@ -96,17 +104,6 @@ namespace CityBudget
         private void MainNewYear()
         {
             _cityManager.SimulateYear();
-
-            _cityManager.UpdateHappiness(_currentTaxSettings, _currentBudgetPolicy);
-            
-            Dispatcher.Invoke(() =>
-            {
-                if (MainFrame.Content == pageGraph)
-                {
-                    ButtonBlue_Click(null, null);
-                }
-            });
-            
         }
 
         private void UpdateUI()
@@ -304,6 +301,25 @@ namespace CityBudget
                 isRunning = false;
                 UpdateUI();
             }
+        }
+
+        private void ButtonRed_Click(object? sender, RoutedEventArgs? e)
+        {
+            pageDecisions = new PageDecisions(_cityBudget, _cityManager, (newBudget) =>
+            {
+                _cityBudget = newBudget;
+                UpdateUI();
+            });
+
+            MainFrame.Navigate(pageDecisions);
+        }
+
+        private void ButtonGreen_Click(object? sender, RoutedEventArgs? e)
+        {
+            pageDecisions.Visibility = Visibility.Hidden;
+            pageGraph.Visibility = Visibility.Hidden;
+            pageInfo.Visibility = Visibility.Hidden;
+            pageTax.Visibility = Visibility.Hidden;
         }
     }
 }
