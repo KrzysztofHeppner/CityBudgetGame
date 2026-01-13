@@ -41,6 +41,7 @@ namespace CityBudget
             Sl_Fire.Value = _policy.FireDept;
             Sl_Roads.Value = _policy.Roads;
             Sl_Admin.Value = _policy.Administration;
+            Sl_Social.Value = _policy.ChildBenefitAmount;
 
             UpdateLabels();
             UpdatePreview();
@@ -63,6 +64,7 @@ namespace CityBudget
             _policy.FireDept = Sl_Fire.Value;
             _policy.Roads = Sl_Roads.Value;
             _policy.Administration = Sl_Admin.Value;
+            _policy.ChildBenefitAmount = Sl_Social.Value;
 
             UpdateLabels();
 
@@ -83,6 +85,7 @@ namespace CityBudget
             if (Tx_Fire != null) Tx_Fire.Text = $"{_policy.FireDept * 100:F0}%";
             if (Tx_Roads != null) Tx_Roads.Text = $"{_policy.Roads * 100:F0}%";
             if (Tx_Admin != null) Tx_Admin.Text = $"{_policy.Administration * 100:F0}%";
+            if (Tx_Social != null) Tx_Social.Text = $"{_policy.ChildBenefitAmount:N0} PLN";
         }
 
         private void UpdatePreview()
@@ -93,6 +96,7 @@ namespace CityBudget
 
             if (ValTotalExp != null) ValTotalExp.Text = $"-{report.TotalExpenses:N0} PLN";
             if (ValTotalInc != null) ValTotalInc.Text = $"+{report.TotalIncome:N0} PLN";
+            if (ValSocial != null) ValSocial.Text = $"-{report.ExpenseSocial:N0} PLN";
 
             if (ValBalance != null)
             {

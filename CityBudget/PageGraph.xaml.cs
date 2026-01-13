@@ -31,7 +31,7 @@ namespace CityBudget
             int[] ageGroups = new int[10];
             foreach (var p in _population)
             {
-                int groupIndex = p.Age / 10;
+                int groupIndex = Convert.ToInt32(p.Age) / 10;
                 if (groupIndex >= ageGroups.Length) groupIndex = ageGroups.Length - 1;
                 ageGroups[groupIndex]++;
             }

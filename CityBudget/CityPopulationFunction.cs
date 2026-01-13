@@ -49,7 +49,8 @@ namespace CityBudget
 
                 for (int i = 0; i < initialCount; i++)
                 {
-                    int age = _random.Next(0, 90);
+                    double age = _random.Next(0, 93);
+                    age += _random.NextDouble();
 
                     Gender gender = (Gender)_random.Next(0, 2);
 
@@ -60,7 +61,7 @@ namespace CityBudget
                         newPerson.IsEmployed = _random.NextDouble() > 0.2;
                         if (newPerson.IsEmployed)
                         {
-                            newPerson.Income = _random.Next(2000, 5000);
+                            newPerson.Income = _random.Next(5000, 10000);
                         }
                     }
 
@@ -71,9 +72,9 @@ namespace CityBudget
 
 
         /// <summary>
-        /// Symuluje upływ jednego roku (starzenie, zgony, narodziny).
+        /// Symuluje upływ jednego miesiąca (starzenie, zgony, narodziny).
         /// </summary>
-        public void SimulateYear()
+        public void SimulateMonth(BudgetPolicy policy)
         {
             lock (_populationLock)
             {
@@ -81,11 +82,17 @@ namespace CityBudget
 
                 foreach (var person in _population)
                 {
-                    person.Age++;
+                    person.Age += 1.0/12.0;
 
-                    double deathChance = 0;
-                    if (person.Age > 75) deathChance = 0.05;
-                    if (person.Age > 90) deathChance = 0.20;
+                    double deathChance = 0.0001;
+                    if (person.Age > 75) deathChance = 0.005;
+                    if (person.Age > 90) deathChance = 0.02;
+                    if (person.Age > 100) deathChance = 0.05;
+                    if (person.Happiness < 30) deathChance *= 1.5;
+                    if (person.Happiness < 15) deathChance *= 2.0;
+                    if (person.Happiness > 60) deathChance *= 0.8;
+                    if (person.Happiness > 80) deathChance *= 0.5;
+                    if (person.Happiness > 95) deathChance *= 0.3;
 
                     if (_random.NextDouble() < deathChance)
                     {
@@ -101,12 +108,16 @@ namespace CityBudget
                 int potentialMothers = _population.Count(p => p.Gender == Gender.Female && p.Age >= 18 && p.Age <= 40);
                 int newBabies = 0;
 
+                double fertilityMultiplier = 1.0 + (policy.ChildBenefitAmount / 700.0);
+
                 foreach (var mother in _population.Where(p => p.Gender == Gender.Female && p.Age >= 18 && p.Age <= 40))
                 {
-                    double baseChance = 0.10;
+                    double baseChance = 0.008 * fertilityMultiplier;
 
-                    if (mother.Happiness < 30) baseChance = 0.01;
-                    else if (mother.Happiness > 80) baseChance = 0.25;
+                    if (mother.Happiness < 30) baseChance = 0.001 * fertilityMultiplier;
+                    else if (mother.Happiness > 50) baseChance = 0.02 * fertilityMultiplier;
+                    else if (mother.Happiness > 70) baseChance = 0.05 * fertilityMultiplier;
+                    else if (mother.Happiness > 80) baseChance = 0.10 * fertilityMultiplier;
 
                     if (_random.NextDouble() < baseChance)
                     {
@@ -205,6 +216,22 @@ namespace CityBudget
                         {
                             change = 0;
                         }
+                        if (person.Happiness > 80)
+                        {
+                            change -= 2;
+                            if (change < 0)
+                            {
+                                change = 0;
+                            }
+                        }
+                        if (person.Happiness > 90)
+                        {
+                            change -= 2;
+                            if (change < 0)
+                            {
+                                change = 0;
+                            }
+                        }
                     }
                     if (person.Happiness < 40)
                     {
@@ -258,22 +285,25 @@ namespace CityBudget
                 }
 
                 int students = _population.Count(p => p.Age >= 6 && p.Age <= 24);
-                report.ExpenseEducation = students * 300 * policy.Education;
+                report.ExpenseEducation = students * 1500 * policy.Education;
 
                 int seniors = _population.Count(p => p.Age > 65);
                 int babies = _population.Count(p => p.Age < 5);
                 int others = _population.Count - (seniors + babies);
-                double baseHealthCost = (seniors * 1000) + (babies * 400) + (others * 50);
+                double baseHealthCost = (seniors * 2000) + (babies * 400) + (others * 50);
                 report.ExpenseHealthcare = baseHealthCost * policy.Healthcare;
 
-                report.ExpensePolice = _population.Count * 25 * policy.Police;
+                report.ExpensePolice = _population.Count * 40 * policy.Police;
 
-                report.ExpenseFireDept = _population.Count * 15 * policy.FireDept;
+                report.ExpenseFireDept = _population.Count * 40 * policy.FireDept;
 
-                double baseRoads = 30000 + (_population.Count * 10);
+                double baseRoads = 30000 + (_population.Count * 30);
                 report.ExpenseRoads = baseRoads * policy.Roads;
 
                 report.ExpenseAdministration = 200000 * policy.Administration;
+
+                int childrenCount = _population.Count(p => p.Age < 18);
+                report.ExpenseSocial = childrenCount * policy.ChildBenefitAmount;
             }
 
             return report;

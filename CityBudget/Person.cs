@@ -11,13 +11,13 @@ namespace CityBudget
     public class Person
     {
         public Guid Id { get; set; }
-        public int Age { get; set; }
+        public double Age { get; set; }
         public Gender Gender { get; set; }
         public double Income { get; set; }
         public bool IsEmployed { get; set; }
         public double Happiness { get; set; }
 
-        public Person(int age, Gender gender)
+        public Person(double age, Gender gender)
         {
             Id = Guid.NewGuid();
             Age = age;

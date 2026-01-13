@@ -21,6 +21,8 @@ namespace CityBudget
         public double FireDept { get; set; } = 1.0;
         public double Roads { get; set; } = 1.0;
         public double Administration { get; set; } = 1.0;
+
+        public double ChildBenefitAmount { get; set; } = 0;
     }
 
     public class FinanceReport
@@ -36,8 +38,9 @@ namespace CityBudget
         public double ExpenseFireDept { get; set; }
         public double ExpenseRoads { get; set; }
         public double ExpenseAdministration { get; set; }
+        public double ExpenseSocial { get; set; }
 
-        public double TotalExpenses => ExpenseEducation + ExpenseHealthcare + ExpensePolice + ExpenseFireDept + ExpenseRoads + ExpenseAdministration;
+        public double TotalExpenses => ExpenseEducation + ExpenseHealthcare + ExpensePolice + ExpenseFireDept + ExpenseRoads + ExpenseAdministration + ExpenseSocial;
         public double Balance => TotalIncome - TotalExpenses;
     }
 

@@ -77,6 +77,7 @@ namespace CityBudget
 
         private void MainNewMonth()
         {
+            _cityManager.SimulateMonth(_currentBudgetPolicy);
             FinanceReport report = _cityManager.CalculateFinances(_currentTaxSettings, _currentBudgetPolicy);
             _cityBudget += report.Balance;
 
@@ -103,7 +104,7 @@ namespace CityBudget
 
         private void MainNewYear()
         {
-            _cityManager.SimulateYear();
+            //_cityManager.SimulateYear();
         }
 
         private void UpdateUI()
