@@ -10,5 +10,6 @@ namespace CityBudget
         public TaxSettings Taxes { get; set; }
         public BudgetPolicy Policy { get; set; }
         public List<Person> Population { get; set; }
+        public Dictionary<string, DateTime> DecisionsHistory { get; set; }
     }
 }

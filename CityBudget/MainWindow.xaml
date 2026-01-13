@@ -12,6 +12,8 @@
         Background="Transparent"
         Height="720"
         Width="1280"
+        MinWidth="1024"
+        MinHeight="400"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -156,11 +158,12 @@
 
                         <Label x:Name="HappinessLabel"
                                Content="Zadowolenie: 50%"
-                               HorizontalAlignment="Right"
                                VerticalAlignment="Top"
                                Margin="0,40,250,0"
                                Foreground="White"
-                               FontSize="16" />
+                               FontSize="16"
+                               HorizontalAlignment="Right"
+                               Width="139" />
 
                         <Label x:Name="PeopleLabel"
                                Content="Ludność: 0"
@@ -171,9 +174,10 @@
                                FontSize="16" />
 
                         <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Top"
-                                    Margin="0,40,400,0">
+                                    Margin="100,30,0,0"
+                                    HorizontalAlignment="Left"
+                                    Width="180">
                             <Button Content="ZAPISZ"
                                     Click="ButtonSave_Click"
                                     Width="80"
@@ -526,14 +530,14 @@
                     <Grid>
 
 
-                        
+
                         <Frame x:Name="MainFrame"
                                Grid.Row="1"
                                Grid.Column="1"
                                NavigationUIVisibility="Hidden"
                                Content=""
                                Visibility="Visible"
-                               Margin="0,0,0,0"/>
+                               Margin="0,0,0,0" />
 
 
                     </Grid>

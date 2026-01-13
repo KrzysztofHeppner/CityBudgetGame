@@ -30,7 +30,9 @@
                     Minimum="0"
                     Maximum="0.50"
                     TickFrequency="0.01"
-                    ValueChanged="Sliders_ValueChanged" />
+                    PreviewMouseDown="Sliders_MouseDown"
+                    PreviewMouseUp="Sliders_MouseUp"
+                    ValueChanged="Sliders_ValueChanged"/>
             <TextBlock x:Name="TextPIT"
                        Text="18%"
                        Foreground="White"
@@ -43,6 +45,8 @@
                     Minimum="0"
                     Maximum="0.40"
                     TickFrequency="0.01"
+                    PreviewMouseDown="Sliders_MouseDown"
+                    PreviewMouseUp="Sliders_MouseUp"
                     ValueChanged="Sliders_ValueChanged" />
             <TextBlock x:Name="TextVAT"
                        Text="23%"
@@ -56,6 +60,8 @@
                     Minimum="0"
                     Maximum="500"
                     TickFrequency="10"
+                    PreviewMouseDown="Sliders_MouseDown"
+                    PreviewMouseUp="Sliders_MouseUp"
                     ValueChanged="Sliders_ValueChanged" />
             <TextBlock x:Name="TextProp"
                        Text="50 PLN"
@@ -79,6 +85,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Edu"
                            Text="100%"
@@ -92,6 +100,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Health"
                            Text="100%"
@@ -105,6 +115,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Police"
                            Text="100%"
@@ -118,6 +130,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Fire"
                            Text="100%"
@@ -131,6 +145,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Roads"
                            Text="100%"
@@ -144,6 +160,8 @@
                         Minimum="0.5"
                         Maximum="2.0"
                         TickFrequency="0.1"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Admin"
                            Text="100%"
@@ -165,6 +183,8 @@
                         Maximum="2000"
                         TickFrequency="50"
                         IsSnapToTickEnabled="True"
+                        PreviewMouseDown="Sliders_MouseDown"
+                        PreviewMouseUp="Sliders_MouseUp"
                         ValueChanged="Sliders_ValueChanged" />
                 <TextBlock x:Name="Tx_Social"
                            Text="0 PLN"

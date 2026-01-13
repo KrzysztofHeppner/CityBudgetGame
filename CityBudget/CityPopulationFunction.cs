@@ -61,7 +61,7 @@ namespace CityBudget
                         newPerson.IsEmployed = _random.NextDouble() > 0.2;
                         if (newPerson.IsEmployed)
                         {
-                            newPerson.Income = _random.Next(5000, 10000);
+                            newPerson.Income = _random.Next(5000, 12000);
                         }
                     }
 
@@ -89,7 +89,7 @@ namespace CityBudget
                     if (person.Age > 90) deathChance = 0.02;
                     if (person.Age > 100) deathChance = 0.05;
                     if (person.Happiness < 30) deathChance *= 1.5;
-                    if (person.Happiness < 15) deathChance *= 2.0;
+                    if (person.Happiness < 15) deathChance *= 5.0;
                     if (person.Happiness > 60) deathChance *= 0.8;
                     if (person.Happiness > 80) deathChance *= 0.5;
                     if (person.Happiness > 95) deathChance *= 0.3;
@@ -115,9 +115,11 @@ namespace CityBudget
                     double baseChance = 0.008 * fertilityMultiplier;
 
                     if (mother.Happiness < 30) baseChance = 0.001 * fertilityMultiplier;
-                    else if (mother.Happiness > 50) baseChance = 0.02 * fertilityMultiplier;
-                    else if (mother.Happiness > 70) baseChance = 0.05 * fertilityMultiplier;
-                    else if (mother.Happiness > 80) baseChance = 0.10 * fertilityMultiplier;
+                    if (mother.Happiness > 40) baseChance = 0.005 * fertilityMultiplier;
+                    if (mother.Happiness > 50) baseChance = 0.01 * fertilityMultiplier;
+                    if (mother.Happiness > 60) baseChance = 0.02 * fertilityMultiplier;
+                    if (mother.Happiness > 70) baseChance = 0.05 * fertilityMultiplier;
+                    if (mother.Happiness > 80) baseChance = 0.10 * fertilityMultiplier;
 
                     if (_random.NextDouble() < baseChance)
                     {
@@ -199,7 +201,7 @@ namespace CityBudget
 
                     if (person.IsEmployed)
                     {
-                        change += (policy.Roads) * 2;
+                        change += (policy.Roads) * 3;
                     }
                     else
                     {
@@ -208,41 +210,33 @@ namespace CityBudget
 
                     change += (policy.Administration) * 0.5;
 
-
-                    if (person.Happiness > 60)
+                    if (person.Happiness > 50)
                     {
-                        change -= 3;
-                        if (change < 0)
-                        {
-                            change = 0;
-                        }
-                        if (person.Happiness > 80)
+                        change -= 2;
+                        if (person.Happiness > 60)
                         {
                             change -= 2;
-                            if (change < 0)
+                            if (person.Happiness > 70)
                             {
-                                change = 0;
-                            }
-                        }
-                        if (person.Happiness > 90)
-                        {
-                            change -= 2;
-                            if (change < 0)
-                            {
-                                change = 0;
+                                change -= 2;
+                                if (person.Happiness > 80)
+                                {
+                                    change -= 2;
+                                    if (person.Happiness > 90)
+                                    {
+                                        change -= 2;
+                                    }
+                                }
                             }
                         }
                     }
                     if (person.Happiness < 40)
                     {
-                        change += 3;
-                        if (change > 0)
-                        {
-                            change = 0;
-                        }
+                        change += 2;
                     }
                     if (person.IsEmployed) 
-                    { 
+                    {
+                        change += 1;
                     }
                     person.Happiness += change;
 
@@ -284,23 +278,27 @@ namespace CityBudget
                     if (person.Age >= 18) report.IncomeProperty += taxes.PropertyTax;
                 }
 
+                int smallChildren = _population.Count(p => p.Age < 6);
+                report.ExpenseEducation = smallChildren * 400 * policy.Education;
+
                 int students = _population.Count(p => p.Age >= 6 && p.Age <= 24);
                 report.ExpenseEducation = students * 1500 * policy.Education;
 
-                int seniors = _population.Count(p => p.Age > 65);
+                int seniors = _population.Count(p => p.Age > 65 && p.Age <= 80);
+                int superSeniors = _population.Count(p => p.Age > 80);
                 int babies = _population.Count(p => p.Age < 5);
-                int others = _population.Count - (seniors + babies);
-                double baseHealthCost = (seniors * 2000) + (babies * 400) + (others * 50);
+                int others = _population.Count - (seniors + babies + superSeniors);
+                double baseHealthCost = (superSeniors * 3000) + (seniors * 1000) + (babies * 400) + (others * 50);
                 report.ExpenseHealthcare = baseHealthCost * policy.Healthcare;
 
-                report.ExpensePolice = _population.Count * 40 * policy.Police;
+                report.ExpensePolice = _population.Count * 45 * policy.Police;
 
-                report.ExpenseFireDept = _population.Count * 40 * policy.FireDept;
+                report.ExpenseFireDept = _population.Count * 45 * policy.FireDept;
 
-                double baseRoads = 30000 + (_population.Count * 30);
+                double baseRoads = 500000 + (_population.Count * 60);
                 report.ExpenseRoads = baseRoads * policy.Roads;
 
-                report.ExpenseAdministration = 200000 * policy.Administration;
+                report.ExpenseAdministration = 500000 * policy.Administration;
 
                 int childrenCount = _population.Count(p => p.Age < 18);
                 report.ExpenseSocial = childrenCount * policy.ChildBenefitAmount;
@@ -367,7 +365,7 @@ namespace CityBudget
 
                 if (avgHappiness > 65)
                 {
-                    int newAdultsCount = (int)((avgHappiness - 65) * (_population.Count * 0.0005));
+                    int newAdultsCount = (int)((avgHappiness - 65) * (_population.Count * 0.001));
 
                     for (int i = 0; i < newAdultsCount; i++)
                     {
@@ -428,17 +426,40 @@ namespace CityBudget
         }
 
         /// <summary>
-        /// Aplikuje jednorazowy efekt decyzji (zmiana zadowolenia).
+        /// Aplikuje efekt decyzji tylko dla osób spełniających kryteria.
         /// </summary>
-        public void ApplyDirectHappinessChange(double amount)
+        public int ApplyDecisionEffect(CityDecision decision)
         {
+            int affectedCount = 0;
+
             lock (_populationLock)
             {
                 foreach (var person in _population)
                 {
-                    person.Happiness += amount;
-                    person.Happiness = Math.Clamp(person.Happiness, 0.0, 100.0);
+                    bool isTarget = decision.TargetFilter == null || decision.TargetFilter(person);
+
+                    if (isTarget)
+                    {
+                        person.Happiness += decision.HappinessEffect;
+
+                        person.Happiness = Math.Clamp(person.Happiness, 0.0, 100.0);
+                        affectedCount++;
+                    }
+                    else
+                    {
+                    }
                 }
+            }
+            return affectedCount;
+        }
+
+        public void ExecuteCustomEffect(Action<List<Person>> effect)
+        {
+            if (effect == null) return;
+
+            lock (_populationLock)
+            {
+                effect(_population);
             }
         }
 

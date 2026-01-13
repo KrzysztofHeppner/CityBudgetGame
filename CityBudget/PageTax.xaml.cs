@@ -15,6 +15,8 @@ namespace CityBudget
         private CityPopulationFunction _cityManagerForPreview;
         private bool _isInitializing = true;
 
+        public bool isChanged = false;
+
         public PageTax()
         {
             InitializeComponent();
@@ -109,6 +111,16 @@ namespace CityBudget
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             UpdatePreview();
+        }
+
+        private void Sliders_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isChanged = true;
+        }
+
+        private void Sliders_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isChanged = false;
         }
     }
 }

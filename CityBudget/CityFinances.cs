@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace CityBudget
 {
@@ -46,13 +47,42 @@ namespace CityBudget
 
     public class CityDecision
     {
+        public string Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public double Cost { get; set; }
+        public Func<List<Person>, double> CalculateCost { get; set; }
+        public double CurrentCost { get; set; }
         public double HappinessEffect { get; set; }
         public bool IsHard { get; set; }
+        public Predicate<Person> TargetFilter { get; set; }
+        public string TargetDescription { get; set; } = "Wszyscy Mieszkańcy";
 
-        public string CostText => Cost > 0 ? $"-{Cost:N0} PLN" : $"+{Math.Abs(Cost):N0} PLN";
-        public System.Windows.Media.Brush CostColor => Cost > 0 ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.LightGreen;
+        public DecisionFrequency Frequency { get; set; }
+        public DateTime? LastUsedDate { get; set; }
+
+        public Action<List<Person>> InstantEffect { get; set; }
+
+        public string CostText => CurrentCost > 0 ? $"-{CurrentCost:N0} PLN" : $"+{Math.Abs(CurrentCost):N0} PLN";
+        public Brush CostColor => CurrentCost > 0 ? Brushes.Red : Brushes.LightGreen;
+
+        public string FrequencyText
+        {
+            get
+            {
+                switch (Frequency)
+                {
+                    case DecisionFrequency.OneTime: return "JEDNORAZOWA";
+                    case DecisionFrequency.Monthly: return "CO MIESIĄC";
+                    case DecisionFrequency.Yearly: return "CO ROK";
+                    default: return "";
+                }
+            }
+        }
+    }
+    public enum DecisionFrequency
+    {
+        OneTime,
+        Monthly,
+        Yearly
     }
 }
