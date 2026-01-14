@@ -221,13 +221,13 @@ namespace CityBudget
                             change -= 2;
                             if (person.Happiness > 70)
                             {
-                                change -= 2;
+                                change -= 3;
                                 if (person.Happiness > 80)
                                 {
-                                    change -= 2;
+                                    change -= 4;
                                     if (person.Happiness > 90)
                                     {
-                                        change -= 2;
+                                        change -= 5;
                                     }
                                 }
                             }

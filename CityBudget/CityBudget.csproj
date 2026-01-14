@@ -8,14 +8,48 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ApplicationIcon>Resource\smallHappy.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Background1.png" />
+    <None Remove="Resource\bigHappy.png" />
+    <None Remove="Resource\bigNormal.png" />
+    <None Remove="Resource\bigRiot.png" />
+    <None Remove="Resource\bigSad.png" />
+    <None Remove="Resource\smallHappy.png" />
+    <None Remove="Resource\smallNormal.png" />
+    <None Remove="Resource\smallRiot.png" />
+    <None Remove="Resource\smallSad.png" />
+    <None Remove="smallNormal.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Background1.png" />
+    <Content Include="Resource\bigHappy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\bigNormal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\bigRiot.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\bigSad.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\smallHappy.ico" />
+    <Content Include="Resource\smallHappy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\smallNormal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\smallRiot.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resource\smallSad.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -1,21 +1,22 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.IO;
-using System.Text.Json;
-using Microsoft.Win32;
-using System.Collections.ObjectModel;
 
 namespace CityBudget
 {
@@ -30,7 +31,8 @@ namespace CityBudget
         bool canClose = true; bool wantClose = false;
         private int _monthsUnder20Percent = 0;
         private int _monthsUnder50Percent = 0;
-
+        private int _currentSpeedLevel = 3;
+        private string _currentWallpaperName = "";
 
         PageInfo pageInfo = new PageInfo();
         PageTax pageTax = new PageTax();
@@ -56,10 +58,10 @@ namespace CityBudget
             _cityManager.MakeNewPopulation(10000);
             InitializeDecisions();
 
-            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5));
+            _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100));
             MainFrame.Visibility = Visibility.Visible;
             AddNews("Witaj w symulatorze miasta! Rozpocznij zarządzanie.", false, null);
-
+            SetGameSpeed(3);
             UpdateUI();
         }
 
@@ -116,6 +118,7 @@ namespace CityBudget
                 }
             }
             CheckWinLossConditions();
+            UpdateWallpaper();
             canClose = false;
             Dispatcher.Invoke(() =>
             {
@@ -364,7 +367,8 @@ namespace CityBudget
                                 }
                             }
                         }
-
+                        _currentWallpaperName = "";
+                        UpdateWallpaper();
                         UpdateUI();
                     }
                 }
@@ -438,7 +442,7 @@ namespace CityBudget
 
                         person.IsEmployed = true;
 
-                        person.Income = rnd.Next(5000, 7000);
+                        person.Income = rnd.Next(5000, 12000);
 
                         person.Happiness = 100;
                     }
@@ -980,6 +984,129 @@ namespace CityBudget
                 startWindow.Show();
                 Application.Current.MainWindow = startWindow;
                 this.Close();
+            });
+        }
+
+
+        private void ButtonSave_MouseEnter(object sender, MouseEventArgs e)
+        {
+            BorderSave.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            ButtonSave.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            Cursor = Cursors.Hand;
+        }
+
+        private void ButtonSave_MouseLeave(object sender, MouseEventArgs e)
+        {
+            BorderSave.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            ButtonSave.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            Cursor = Cursors.Arrow;
+        }
+        private void ButtonLoad_MouseEnter(object sender, MouseEventArgs e)
+        {
+            BorderLoad.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            ButtonLoad.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            Cursor = Cursors.Hand;
+        }
+
+        private void ButtonLoad_MouseLeave(object sender, MouseEventArgs e)
+        {
+            BorderLoad.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x1e, 0x1e, 0x1e));
+            ButtonLoad.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0x88, 0x88, 0x88));
+            Cursor = Cursors.Arrow;
+        }
+
+        private void SpeedBar_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Rectangle rect && int.TryParse(rect.Tag.ToString(), out int level))
+            {
+                SetGameSpeed(level);
+            }
+        }
+        private void SetGameSpeed(int level)
+        {
+            _currentSpeedLevel = level;
+
+            Rectangle[] bars = { SpeedBar1, SpeedBar2, SpeedBar3, SpeedBar4, SpeedBar5 };
+
+            var colorActive = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // Zielony
+            var colorInactive = new SolidColorBrush(Color.FromRgb(0x50, 0x50, 0x50)); // Szary
+            var colorDanger = new SolidColorBrush(Color.FromRgb(0xFF, 0x33, 0x33)); // Czerwony
+
+            for (int i = 0; i < bars.Length; i++)
+            {
+                int barLevel = i + 1;
+
+                if (barLevel <= _currentSpeedLevel)
+                {
+                    if (barLevel == 5 && _currentSpeedLevel == 5)
+                    {
+                        bars[i].Fill = colorDanger;
+                    }
+                    else
+                    {
+                        bars[i].Fill = colorActive;
+                    }
+                }
+                else
+                {
+                    bars[i].Fill = colorInactive;
+                }
+            }
+
+            if (_timer != null)
+            {
+                int period = 100;
+
+                switch (level)
+                {
+                    case 1: period = 250; break;
+                    case 2: period = 100; break;
+                    case 3: period = 50; break;
+                    case 4: period = 20; break;
+                    case 5: period = 5; break;
+                }
+                
+                _timer.Change(0, period);
+            }
+        }
+        private void UpdateWallpaper()
+        {
+            int population = _cityManager.PopulationCount;
+            double happiness = _cityManager.GetAverageHappiness();
+
+            string sizePrefix = population >= 20000 ? "big" : "small";
+            string moodSuffix = "Normal";
+
+            if (happiness < 25) moodSuffix = "Riot";
+            else if (happiness < 45) moodSuffix = "Sad";
+            else if (happiness > 75) moodSuffix = "Happy";
+
+            string fileName = $"{sizePrefix}{moodSuffix}.png";
+
+            if (_currentWallpaperName == fileName) return;
+
+            Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    string packUri = $"pack://application:,,,/Resource/{fileName}";
+
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(packUri);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+
+                    if (ImageBackground != null)
+                    {
+                        ImageBackground.ImageSource = bitmap;
+                    }
+
+                    _currentWallpaperName = fileName;
+                }
+                catch (Exception ex)
+                {
+                }
             });
         }
     }
