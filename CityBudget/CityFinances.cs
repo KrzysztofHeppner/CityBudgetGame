@@ -7,13 +7,18 @@ using System.Windows.Media;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Ustawienia podatkowe miasta
+    /// </summary>
     public class TaxSettings
     {
         public double PIT { get; set; } = 0.18;
         public double VAT { get; set; } = 0.23;
         public double PropertyTax { get; set; } = 50;
     }
-
+    /// <summary>
+    /// Polityka budżetowa miasta
+    /// </summary>
     public class BudgetPolicy
     {
         public double Education { get; set; } = 1.0;
@@ -25,7 +30,9 @@ namespace CityBudget
 
         public double ChildBenefitAmount { get; set; } = 0;
     }
-
+    /// <summary>
+    /// Raport finansowy miasta
+    /// </summary>
     public class FinanceReport
     {
         public double IncomePIT { get; set; }
@@ -44,7 +51,9 @@ namespace CityBudget
         public double TotalExpenses => ExpenseEducation + ExpenseHealthcare + ExpensePolice + ExpenseFireDept + ExpenseRoads + ExpenseAdministration + ExpenseSocial;
         public double Balance => TotalIncome - TotalExpenses;
     }
-
+    /// <summary>
+    /// Decyzja miejska
+    /// </summary>
     public class CityDecision
     {
         public string Id { get; set; }
@@ -79,6 +88,9 @@ namespace CityBudget
             }
         }
     }
+    /// <summary>
+    /// Częstotliwość decyzji miejskiej
+    /// </summary>
     public enum DecisionFrequency
     {
         OneTime,

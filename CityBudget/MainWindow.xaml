@@ -72,6 +72,7 @@
                           MinWidth="300"
                           Margin="0,0,0,0"
                           HorizontalAlignment="Left">
+
                         <Label Content="Ostatnie Wiadomości"
                                HorizontalAlignment="Center"
                                Margin="20,5,20,0"
@@ -80,66 +81,45 @@
                                Foreground="White"
                                FontSize="25" />
 
-                        <Border BorderBrush="#FF505050"
-                                BorderThickness="1"
-                                ClipToBounds="True"
-                                MinHeight="50"
-                                MinWidth="50"
-                                Width="250"
-                                Height="100"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                CornerRadius="15,15,15,15"
-                                Margin="0,75,0,0"
-                                Background="#FF313131" />
-                        <Border BorderBrush="#FF505050"
-                                BorderThickness="1"
-                                Background="#FF313131"
-                                ClipToBounds="True"
-                                MinHeight="50"
-                                MinWidth="50"
-                                Width="250"
-                                Height="150"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                CornerRadius="15,15,15,15"
-                                Margin="0,200,0,0" />
-                        <Border BorderBrush="#FF505050"
-                                BorderThickness="1"
-                                Background="#FF313131"
-                                ClipToBounds="True"
-                                MinHeight="50"
-                                MinWidth="50"
-                                Width="250"
-                                Height="50"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                CornerRadius="15,15,15,15"
-                                Margin="0,375,0,0" />
-                        <Border BorderBrush="#FF505050"
-                                BorderThickness="1"
-                                Background="#FF313131"
-                                ClipToBounds="True"
-                                MinHeight="50"
-                                MinWidth="50"
-                                Width="250"
-                                Height="50"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                CornerRadius="15,15,15,15"
-                                Margin="0,450,0,0" />
-                        <Border BorderBrush="#FF505050"
-                                BorderThickness="1"
-                                Background="#FF313131"
-                                ClipToBounds="True"
-                                MinHeight="50"
-                                MinWidth="50"
-                                Width="250"
-                                Height="50"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Top"
-                                CornerRadius="15,15,15,15"
-                                Margin="0,525,0,0" />
+                        <ItemsControl ItemsSource="{Binding RecentNews}"
+                                      Margin="0,60,0,0"
+                                      Width="280">
+
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="2"
+                                            ClipToBounds="True"
+                                            MinHeight="50"
+                                            Width="250"
+                                            HorizontalAlignment="Center"
+                                            CornerRadius="10"
+                                            Margin="0,0,0,10"
+                                            Background="#FF313131">
+
+                                        <Border.BorderBrush>
+                                            <SolidColorBrush Color="{Binding BorderColor}" />
+                                        </Border.BorderBrush>
+
+                                        <StackPanel Margin="10">
+                                            <TextBlock Text="{Binding Time}"
+                                                       Foreground="Gray"
+                                                       FontSize="10"
+                                                       Margin="0,0,0,2" />
+                                            <TextBlock Text="{Binding Text}"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="White"
+                                                       FontSize="12" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
                     </Grid>
                 </Border>
 
@@ -159,19 +139,20 @@
                         <Label x:Name="HappinessLabel"
                                Content="Zadowolenie: 50%"
                                VerticalAlignment="Top"
-                               Margin="0,40,250,0"
+                               Margin="0,35,250,0"
                                Foreground="White"
                                FontSize="16"
                                HorizontalAlignment="Right"
-                               Width="139" />
+                               Width="200" />
 
                         <Label x:Name="PeopleLabel"
                                Content="Ludność: 0"
                                HorizontalAlignment="Right"
                                VerticalAlignment="Top"
-                               Margin="0,63,250,0"
+                               Margin="0,60,250,0"
                                Foreground="White"
-                               FontSize="16" />
+                               FontSize="16"
+                               Width="200" />
 
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Top"
@@ -206,6 +187,27 @@
                                 VerticalAlignment="Top"
                                 CornerRadius="25,25,25,25"
                                 Margin="25,25,0,0">
+                            <Button Background="Transparent"
+                                    Click="Settings_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Grid>
+                                                        <Ellipse Fill="{TemplateBinding Background}"
+                                                                 x:Name="ButtonEllipse" />
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center" />
+
+
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
 
                         </Border>
 
@@ -512,6 +514,14 @@
                                VerticalAlignment="Top"
                                HorizontalAlignment="Right"
                                Width="100" />
+                        <Label x:Name="BudgetLabel"
+                               Content="Budżet: 100 000 PLN"
+                               VerticalAlignment="Top"
+                               Margin="0,10,250,0"
+                               Foreground="White"
+                               FontSize="16"
+                               HorizontalAlignment="Right"
+                               Width="200" />
                     </Grid>
                 </Border>
 

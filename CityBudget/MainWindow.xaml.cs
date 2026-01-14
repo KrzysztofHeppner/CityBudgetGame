@@ -15,15 +15,21 @@ using System.Windows.Threading;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Win32;
+using System.Collections.ObjectModel;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
     public partial class MainWindow : Window
     {
         private Timer? _timer;
         DateTime currentDate = new(2000, 1, 1);
         bool isRunning = false;
         bool canClose = true; bool wantClose = false;
+        private int _monthsUnder20Percent = 0;
+        private int _monthsUnder50Percent = 0;
 
 
         PageInfo pageInfo = new PageInfo();
@@ -38,15 +44,22 @@ namespace CityBudget
         private BudgetPolicy _currentBudgetPolicy = new BudgetPolicy();
         private List<CityDecision> _allDecisions = new List<CityDecision>();
 
+        public ObservableCollection<NewsItem> RecentNews { get; set; } = new ObservableCollection<NewsItem>();
+
         public MainWindow()
         {
             InitializeComponent();
+
+            this.DataContext = this;
+
             _cityManager = new CityPopulationFunction();
             _cityManager.MakeNewPopulation(10000);
             InitializeDecisions();
 
             _timer = new Timer(MainTimerTick, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5));
             MainFrame.Visibility = Visibility.Visible;
+            AddNews("Witaj w symulatorze miasta! Rozpocznij zarządzanie.", false, null);
+
             UpdateUI();
         }
 
@@ -85,7 +98,25 @@ namespace CityBudget
             _cityManager.UpdateHappiness(_currentTaxSettings, _currentBudgetPolicy);
             
             string migrationStatus = _cityManager.HandleMigration();
+            if (migrationStatus.Contains("Kryzys")) AddNews(migrationStatus, false, null);
+            else if (migrationStatus.Contains("Rozwój")) AddNews(migrationStatus, true, null);
 
+            if (_cityBudget < 0)
+            {
+                double interestRate = 0.05*(1/12.0);
+                double interestCost = Math.Abs(_cityBudget) * interestRate;
+
+                _cityBudget -= interestCost;
+                
+                if (interestCost > 0)
+                {
+                    _cityManager.ApplyDirectHappinessChange(-3);
+                    AddNews($"Karne odsetki: -{interestCost:N0} PLN.", false, null);
+                    AddNews("Brak środków w kasie obniża zadowolenie mieszkańców!", false, null);
+                }
+            }
+            CheckWinLossConditions();
+            canClose = false;
             Dispatcher.Invoke(() =>
             {
                 if (MainFrame.Content == pageTax && !pageTax.isChanged)
@@ -101,6 +132,7 @@ namespace CityBudget
                     //ButtonRed_Click(null, null);
                 }
             });
+            canClose = true;
         }
 
         private void MainNewYear()
@@ -126,6 +158,22 @@ namespace CityBudget
                     else HappinessLabel.Foreground = Brushes.White;
 
                     PeopleLabel.Content = $"Ludność: {_cityManager.PopulationCount}";
+
+                    if (BudgetLabel != null)
+                    {
+                        BudgetLabel.Content = $"Budżet: {_cityBudget:N0} PLN";
+
+                        if (_cityBudget < 0)
+                        {
+                            BudgetLabel.Foreground = System.Windows.Media.Brushes.Red;
+                            BudgetLabel.FontWeight = FontWeights.Bold;
+                        }
+                        else
+                        {
+                            BudgetLabel.Foreground = System.Windows.Media.Brushes.LightGreen;
+                            BudgetLabel.FontWeight = FontWeights.Normal;
+                        }
+                    }
                 });
                 canClose = true;
             }
@@ -180,7 +228,13 @@ namespace CityBudget
         {
             wantClose = true;
             if (canClose)
-                App.Current.Shutdown();
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    App.Current.Shutdown();
+                });
+                
+            }
         }
 
         private void MinExit_Click(object sender, RoutedEventArgs e)
@@ -235,10 +289,13 @@ namespace CityBudget
                     CurrentDate = currentDate,
                     Taxes = _currentTaxSettings,
                     Policy = _currentBudgetPolicy,
+                    monthsUnder20Percent = _monthsUnder20Percent,
+                    monthsUnder50Percent = _monthsUnder50Percent,
                     DecisionsHistory = _allDecisions
                         .Where(d => d.LastUsedDate.HasValue)
                         .ToDictionary(d => d.Id, d => d.LastUsedDate.Value),
                     Population = _cityManager.GetPopulationSnapshot()
+                    
                 };
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -286,6 +343,8 @@ namespace CityBudget
                         currentDate = state.CurrentDate;
                         _currentTaxSettings = state.Taxes ?? new TaxSettings();
                         _currentBudgetPolicy = state.Policy ?? new BudgetPolicy();
+                        _monthsUnder20Percent = state.monthsUnder20Percent;
+                        _monthsUnder50Percent = state.monthsUnder50Percent;
 
                         if (state.Population != null)
                         {
@@ -325,10 +384,12 @@ namespace CityBudget
         {
             var activeDecisions = GetAvailableDecisions();
             pageDecisions = new PageDecisions(activeDecisions, _cityBudget, _cityManager, (newBudget) =>
-            {
-                _cityBudget = newBudget;
-                UpdateUI();
-            });
+                {
+                    _cityBudget = newBudget;
+                    UpdateUI();
+                },
+                (message, isGood) => AddNews(message, isGood, null)
+            );
             pageDecisions.CurrentGameDate = currentDate;
             MainFrame.Navigate(pageDecisions);
         }
@@ -386,6 +447,38 @@ namespace CityBudget
 
             _allDecisions.Add(new CityDecision
             {
+                Id = "hard_grant_program",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Lokalny Program Grantów",
+                Description = "Zainwestuj w innowacje i start-upy. Każdy pracujący ma 5% szansy na awans i wzrost pensji o 10%.",
+
+                CalculateCost = (p) => 50000 + (p.Count(x => x.IsEmployed) * 200.0),
+
+                HappinessEffect = 5.0,
+                IsHard = true,
+                TargetFilter = p => p.IsEmployed,
+                TargetDescription = "Pracujący (Loteria zarobkowa)",
+
+                InstantEffect = (population) =>
+                {
+                    Random rnd = new Random();
+                    foreach (var person in population)
+                    {
+                        if (person.IsEmployed)
+                        {
+                            if (rnd.NextDouble() < 0.05)
+                            {
+                                person.Income *= 1.10;
+
+                                person.Happiness = 100;
+                            }
+                        }
+                    }
+                }
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
                 Id = "build_aquapark",
                 Frequency = DecisionFrequency.OneTime,
                 Title = "Budowa Aquaparku",
@@ -406,19 +499,6 @@ namespace CityBudget
                 HappinessEffect = 5.0,
                 IsHard = false,
                 TargetDescription = "Wszyscy"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
-                Id = "monthly_fines",
-                Frequency = DecisionFrequency.Monthly,
-                Title = "Nagonka Mandatowa",
-                Description = "Wyślij straż miejską by łatać budżet mandatami.",
-                CalculateCost = (p) => -(p.Count(x => x.IsEmployed) * 50.0),
-                HappinessEffect = -3.0,
-                IsHard = false,
-                TargetFilter = p => p.IsEmployed,
-                TargetDescription = "Pracujący"
             });
 
             _allDecisions.Add(new CityDecision
@@ -547,43 +627,6 @@ namespace CityBudget
 
             _allDecisions.Add(new CityDecision
             {
-                Id = "tax_parking",
-                Frequency = DecisionFrequency.Monthly,
-                Title = "Rozszerzona Strefa Parkowania",
-                Description = "Płatne parkowanie na osiedlach.",
-                CalculateCost = (p) => -(p.Count(x => x.Age >= 18) * 15.0),
-                HappinessEffect = -4.0,
-                IsHard = false,
-                TargetFilter = p => p.Age >= 18,
-                TargetDescription = "Dorośli"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
-                Id = "tax_tourist",
-                Frequency = DecisionFrequency.Monthly,
-                Title = "Opłata Klimatyczna",
-                Description = "Dodatkowa taksa doliczana do usług. Mieszkańcy też to odczują.",
-                CalculateCost = (p) => -(p.Count * 20.0),
-                HappinessEffect = -1.0,
-                IsHard = false,
-                TargetDescription = "Wszyscy"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
-                Id = "tax_ads",
-                Frequency = DecisionFrequency.Monthly,
-                Title = "Reklamy Wielkoformatowe",
-                Description = "Pozwól obkleić centrum reklamami. Brzydko, ale płacą.",
-                CalculateCost = (p) => -150000,
-                HappinessEffect = -2.0,
-                IsHard = false,
-                TargetDescription = "Wszyscy (Estetyka)"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
                 Id = "social_library",
                 Frequency = DecisionFrequency.OneTime,
                 Title = "Nowe Książki do Biblioteki",
@@ -623,31 +666,6 @@ namespace CityBudget
 
             _allDecisions.Add(new CityDecision
             {
-                Id = "hard_factory",
-                Frequency = DecisionFrequency.OneTime,
-                Title = "Fabryka Chemiczna",
-                Description = "Inwestor chce zbudować fabrykę. Śmierdzi, ale zapłaci fortunę za grunt.",
-                CalculateCost = (p) => -300000,
-                HappinessEffect = -25.0,
-                IsHard = true,
-                TargetDescription = "Wszyscy (Skażenie)"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
-                Id = "hard_school_close",
-                Frequency = DecisionFrequency.OneTime,
-                Title = "Likwidacja Małych Szkół",
-                Description = "Dzieci będą dojeżdżać do molochów. Oszczędność kosztów.",
-                CalculateCost = (p) => -500000,
-                HappinessEffect = -20.0,
-                IsHard = true,
-                TargetFilter = p => p.Age < 18,
-                TargetDescription = "Dzieci i Rodzice"
-            });
-
-            _allDecisions.Add(new CityDecision
-            {
                 Id = "hard_bridge",
                 Frequency = DecisionFrequency.OneTime,
                 Title = "Most",
@@ -669,6 +687,143 @@ namespace CityBudget
                 HappinessEffect = -5.0,
                 IsHard = true,
                 TargetDescription = "Wszyscy (Żenada)"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "env_graffiti",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Usuwanie Graffiti",
+                Description = "Wyczyść pomazane mury w centrum. Miasto zyska na estetyce.",
+                CalculateCost = (p) => 5000 + (p.Count * 2.0),
+                HappinessEffect = 3.0,
+                IsHard = false,
+                TargetDescription = "Wszyscy"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "infra_sidewalk",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Remont Chodników",
+                Description = "Wymiana płyt chodnikowych na kostkę brukową.",
+                CalculateCost = (p) => 10000 + (p.Count * 10.0),
+                HappinessEffect = 2.5,
+                IsHard = false,
+                TargetDescription = "Wszyscy"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "env_flowers",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Miejskie Rabaty Kwiatowe",
+                Description = "Posadź bratki i begonie na rondach.",
+                CalculateCost = (p) => 5000,
+                HappinessEffect = 3.0,
+                IsHard = false,
+                TargetFilter = p => p.Age >= 60,
+                TargetDescription = "Głównie Seniorzy"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "trans_night",
+                Frequency = DecisionFrequency.Monthly,
+                Title = "Nocne Autobusy",
+                Description = "Uruchom dodatkowe linie nocne w weekendy.",
+                CalculateCost = (p) => 3000 + (p.Count * 0.5),
+                HappinessEffect = 3.0,
+                IsHard = false,
+                TargetFilter = p => p.Age >= 18 && p.Age <= 30,
+                TargetDescription = "Młodzi Dorośli (18-30)"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "event_xmas",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Iluminacja Świąteczna",
+                Description = "Udekoruj latarnie i postaw choinkę na rynku.",
+                CalculateCost = (p) => 15000 + (p.Count * 2.0),
+                HappinessEffect = 7.0,
+                IsHard = false,
+                TargetDescription = "Wszyscy"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "hard_factory",
+                Frequency = DecisionFrequency.Yearly,
+                Title = "Fabryka Chemiczna",
+                Description = "Inwestor chce zbudować fabrykę. Śmierdzi, ale zapłaci fortunę za grunt.",
+                CalculateCost = (p) => -5000000,
+                HappinessEffect = -25.0,
+                IsHard = true,
+                TargetDescription = "Wszyscy (Skażenie)"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "hard_school_close",
+                Frequency = DecisionFrequency.OneTime,
+                Title = "Likwidacja Małych Szkół",
+                Description = "Dzieci będą dojeżdżać do molochów. Oszczędność kosztów.",
+                CalculateCost = (p) => -500000,
+                HappinessEffect = -20.0,
+                IsHard = true,
+                TargetFilter = p => p.Age < 18,
+                TargetDescription = "Dzieci i Rodzice"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "monthly_fines",
+                Frequency = DecisionFrequency.Monthly,
+                Title = "Nagonka Mandatowa",
+                Description = "Wyślij straż miejską by łatać budżet mandatami.",
+                CalculateCost = (p) => -(p.Count(x => x.IsEmployed) * 50.0),
+                HappinessEffect = -3.0,
+                IsHard = false,
+                TargetFilter = p => p.IsEmployed,
+                TargetDescription = "Pracujący"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "tax_parking",
+                Frequency = DecisionFrequency.Monthly,
+                Title = "Rozszerzona Strefa Parkowania",
+                Description = "Płatne parkowanie na osiedlach.",
+                CalculateCost = (p) => -(p.Count(x => x.Age >= 18) * 15.0),
+                HappinessEffect = -4.0,
+                IsHard = false,
+                TargetFilter = p => p.Age >= 18,
+                TargetDescription = "Dorośli"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "tax_tourist",
+                Frequency = DecisionFrequency.Monthly,
+                Title = "Opłata Klimatyczna",
+                Description = "Dodatkowa taksa doliczana do usług. Mieszkańcy też to odczują.",
+                CalculateCost = (p) => -(p.Count * 20.0),
+                HappinessEffect = -1.0,
+                IsHard = false,
+                TargetDescription = "Wszyscy"
+            });
+
+            _allDecisions.Add(new CityDecision
+            {
+                Id = "tax_ads",
+                Frequency = DecisionFrequency.Monthly,
+                Title = "Reklamy Wielkoformatowe",
+                Description = "Pozwól obkleić centrum reklamami. Brzydko, ale płacą.",
+                CalculateCost = (p) => -150000,
+                HappinessEffect = -2.0,
+                IsHard = false,
+                TargetDescription = "Wszyscy (Estetyka)"
             });
 
         }
@@ -713,5 +868,120 @@ namespace CityBudget
             }
             return available;
         }
+
+        public void AddNews(string message, bool isGoodNews, string? superColor)
+        {
+            string color = isGoodNews ? "#4CAF50" : "#F44336";
+            if (message.Contains("Witaj")) color = "#FF505050";
+
+            if (superColor != null)
+            {
+                color = superColor;
+            }
+            
+            var news = new NewsItem
+            {
+                Text = message,
+                BorderColor = color,
+                Time = currentDate.ToShortDateString()
+            };
+            canClose = false;
+            Dispatcher.Invoke(() =>
+            {
+                RecentNews.Insert(0, news);
+            });
+
+            if (RecentNews.Count > 6)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    RecentNews.RemoveAt(6);
+                });
+            }
+            canClose = true;
+        }
+
+        private void CheckWinLossConditions()
+        {
+            double avgHappiness = _cityManager.GetAverageHappiness();
+            int population = _cityManager.PopulationCount;
+
+            if (population >= 100000 && _cityBudget > 0)
+            {
+                EndGame("ZWYCIĘSTWO!\n\nStworzyłeś potężną metropolię, która prosperuje finansowo. Twoja kadencja przejdzie do historii!", true);
+                return;
+            }
+
+            if (avgHappiness < 20.0)
+            {
+                _monthsUnder20Percent++;
+                if (_monthsUnder20Percent < 3)
+                {
+                    AddNews($"OSTRZEŻENIE! Skrajnie niskie zadowolenie ({_monthsUnder20Percent}/3 mies.)!", false, "#FF5500");
+                }
+            }
+            else
+            {
+                _monthsUnder20Percent = 0;
+            }
+
+            if (_monthsUnder20Percent >= 3)
+            {
+                EndGame("PORAŻKA!\n\nWybuchły zamieszki. Mieszkańcy wywieźli Cię na taczce. Zadowolenie było krytyczne przez zbyt długi czas.", false);
+                return;
+            }
+
+            if (avgHappiness < 50.0)
+            {
+                _monthsUnder50Percent++;
+                if (_monthsUnder50Percent >= 2)
+                {
+                    if (_monthsUnder50Percent == 11)
+                        AddNews($"UWAGA! Ludzie są nieszczęśliwi od 11 miesięcy. Grozi Ci odwołanie. Za 1 miesiąc wybory", false, "#FF5500");
+                    else if (_monthsUnder50Percent < 11 && _monthsUnder50Percent > 8)
+                        AddNews($"UWAGA! Ludzie są nieszczęśliwi od {_monthsUnder50Percent} miesięcy. Grozi Ci odwołanie. Za {12 - _monthsUnder50Percent} miesiące wybory", false, "#FF5500");
+                    else
+                        AddNews($"UWAGA! Ludzie są nieszczęśliwi od {_monthsUnder50Percent} miesięcy. Grozi Ci odwołanie. Za {12 - _monthsUnder50Percent} miesiący wybory", false, "#FF5500");
+
+                }
+            }
+            else
+            {
+                _monthsUnder50Percent = 0;
+            }
+
+            if (_monthsUnder50Percent >= 12)
+            {
+                EndGame("PORAŻKA!\n\nPrzegrałeś wybory. Mieszkańcy byli niezadowoleni przez cały rok.", false);
+                return;
+            }
+        }
+
+        private void EndGame(string message, bool isWin)
+        {
+            isRunning = false;
+
+            string title = isWin ? "WYGRANA" : "KONIEC GRY";
+            MessageBoxImage icon = isWin ? MessageBoxImage.Information : MessageBoxImage.Error;
+            Dispatcher.Invoke(() =>
+            {
+                MessageBox.Show(this, message, title, MessageBoxButton.OK, icon);
+            });
+            ButtonSave_Click(null, null);
+            BtnExit_Click(null, null);
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                StartWindow startWindow = new();
+                this.Hide();
+                startWindow.Show();
+                Application.Current.MainWindow = startWindow;
+                this.Close();
+            });
+        }
     }
+    
 }

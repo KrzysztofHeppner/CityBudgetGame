@@ -7,7 +7,9 @@ namespace CityBudget
         Male,
         Female
     }
-
+    /// <summary>
+    /// Osoba w populacji miasta
+    /// </summary>
     public class Person
     {
         public Guid Id { get; set; }

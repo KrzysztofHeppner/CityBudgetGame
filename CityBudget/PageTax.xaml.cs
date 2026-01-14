@@ -5,6 +5,9 @@ using System.Windows.Media;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Interaction logic for PageTax.xaml
+    /// </summary>
     public partial class PageTax : Page
     {
         private TaxSettings _taxes;

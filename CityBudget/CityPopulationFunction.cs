@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Funkcje zarządzania populacją miasta.
+    /// </summary>
     public class CityPopulationFunction
     {
         private List<Person> _population;
@@ -452,7 +455,10 @@ namespace CityBudget
             }
             return affectedCount;
         }
-
+        /// <summary>
+        /// Wykonuje niestandardowy efekt decyzji na populacji.
+        /// </summary>
+        /// <param name="effect"></param>
         public void ExecuteCustomEffect(Action<List<Person>> effect)
         {
             if (effect == null) return;
@@ -463,6 +469,20 @@ namespace CityBudget
             }
         }
 
+        /// <summary>
+        /// Aplikuje jednorazowy efekt decyzji (zmiana zadowolenia).
+        /// </summary>
+        public void ApplyDirectHappinessChange(double amount)
+        {
+            lock (_populationLock)
+            {
+                foreach (var person in _population)
+                {
+                    person.Happiness += amount;
+                    person.Happiness = Math.Clamp(person.Happiness, 0.0, 100.0);
+                }
+            }
+        }
 
     }
 }

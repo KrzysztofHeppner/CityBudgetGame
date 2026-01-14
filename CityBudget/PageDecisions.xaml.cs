@@ -6,12 +6,16 @@ using System.Windows.Controls;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Interaction logic for PageDecisions.xaml
+    /// </summary>
     public partial class PageDecisions : Page
     {
         private List<CityDecision> _decisionsList;
         private double _currentBudget;
         private Action<double> _onBudgetChanged;
         private CityPopulationFunction _cityManager;
+        private Action<string, bool> _onNewsAdded;
 
         public DateTime CurrentGameDate { get; set; }
 
@@ -19,13 +23,14 @@ namespace CityBudget
         {
             InitializeComponent();
         }
-        public PageDecisions(List<CityDecision> decisions, double currentBudget, CityPopulationFunction cityManager, Action<double> onBudgetChanged)
+        public PageDecisions(List<CityDecision> decisions, double currentBudget, CityPopulationFunction cityManager, Action<double> onBudgetChanged, Action<string, bool> onNewsAdded)
         {
             InitializeComponent();
             _decisionsList = decisions;
             _currentBudget = currentBudget;
             _cityManager = cityManager;
             _onBudgetChanged = onBudgetChanged;
+            _onNewsAdded = onNewsAdded;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -50,7 +55,6 @@ namespace CityBudget
 
             if (decision.CurrentCost > 0 && _currentBudget < decision.CurrentCost)
             {
-                //MessageBox.Show("Brak środków!", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -66,8 +70,22 @@ namespace CityBudget
             _decisionsList.Remove(decision);
             RefreshLists();
 
-            string type = decision.CurrentCost > 0 ? "Wydano" : "Zarobiono";
-            //MessageBox.Show($"{type}: {Math.Abs(decision.CurrentCost):N0} PLN\nDotyczyło: {affected} osób.\nDecyzja: {decision.FrequencyText}", "Sukces");
+            bool isGood = decision.HappinessEffect >= 0;
+
+            string message = $"Podjęto: {decision.Title}.\n";
+            if (decision.CurrentCost > 0) message += $"Wydano: {decision.CurrentCost:N0} PLN.";
+            else message += $"Zarobiono: {Math.Abs(decision.CurrentCost):N0} PLN.";
+
+            _onNewsAdded?.Invoke(message, isGood);
         }
+    }
+    /// <summary>
+    /// Przedstawia pojedynczą wiadomość w systemie wiadomości gry.
+    /// </summary>
+    public class NewsItem
+    {
+        public string Text { get; set; }
+        public string BorderColor { get; set; }
+        public string Time { get; set; }
     }
 }

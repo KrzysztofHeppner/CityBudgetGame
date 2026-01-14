@@ -7,6 +7,9 @@ using System.Windows.Shapes;
 
 namespace CityBudget
 {
+    /// <summary>
+    /// Interaction logic for PageGraph.xaml
+    /// </summary>
     public partial class PageGraph : Page
     {
         private List<Person> _population;
